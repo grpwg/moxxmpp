@@ -44,6 +44,9 @@ const pubsubNodeConfigMultiItems =
 // XEP-0066
 const oobDataXmlns = 'jabber:x:oob';
 
+// XEP-0077
+const inBandRegistrationXmlns = 'jabber:iq:register';
+
 // XEP-0084
 const userAvatarDataXmlns = 'urn:xmpp:avatar:data';
 const userAvatarMetadataXmlns = 'urn:xmpp:avatar:metadata';

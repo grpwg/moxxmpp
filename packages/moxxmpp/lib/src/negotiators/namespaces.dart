@@ -12,3 +12,4 @@ const bind2Negotiator = 'org.moxxmpp.bind2';
 const saslFASTNegotiator = 'org.moxxmpp.sasl.fast';
 const carbonsNegotiator = 'org.moxxmpp.bind2.carbons';
 const presenceNegotiator = 'org.moxxmpp.core.presence';
+const inBandRegistrationNegotiator = 'org.moxxmpp.xeps.inbandregistration';

@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:moxxmpp/src/connection_errors.dart';
 import 'package:moxxmpp/src/handlers/base.dart';
@@ -6,10 +7,11 @@ import 'package:moxxmpp/src/namespaces.dart';
 import 'package:moxxmpp/src/negotiators/negotiator.dart';
 import 'package:moxxmpp/src/parser.dart';
 import 'package:moxxmpp/src/stringxml.dart';
+import 'package:moxxmpp/src/xeps/xep_0077/xep_0077.dart';
 
 /// "Nonza" describing the XMPP stream header of a client-to-server connection.
 class ClientStreamHeaderNonza extends XMLNode {
-  ClientStreamHeaderNonza(JID jid)
+  ClientStreamHeaderNonza(JID jid, {bool isRegistration = false})
       : super(
           tag: 'stream:stream',
           attributes: <String, String>{
@@ -17,7 +19,7 @@ class ClientStreamHeaderNonza extends XMLNode {
             'version': '1.0',
             'xmlns:stream': streamXmlns,
             'to': jid.domain,
-            'from': jid.toBare().toString(),
+            if (!isRegistration) 'from': jid.toBare().toString(),
             'xml:lang': 'en',
           },
           closeTag: false,
@@ -61,6 +63,11 @@ class ClientToServerNegotiator extends NegotiationsHandler {
   @override
   void sendStreamHeader() {
     resetStreamParser();
+    final registrationNegotiator = negotiators.values.firstWhereOrNull(
+            (XmppFeatureNegotiatorBase negotiator) =>
+                // ignore: require_trailing_commas
+                negotiator is InBandRegistrationNegotiatorInterface)
+        as InBandRegistrationNegotiatorInterface?;
     sendNonza(
       XMLNode(
         tag: 'xml',
@@ -68,7 +75,10 @@ class ClientToServerNegotiator extends NegotiationsHandler {
         closeTag: false,
         isDeclaration: true,
         children: [
-          ClientStreamHeaderNonza(getConnectionSettings().jid),
+          ClientStreamHeaderNonza(
+            getConnectionSettings().jid,
+            isRegistration: registrationNegotiator?.attemptRegistration ?? false,
+          ),
         ],
       ),
     );
