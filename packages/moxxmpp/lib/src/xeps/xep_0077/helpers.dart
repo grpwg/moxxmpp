@@ -98,9 +98,10 @@ class InBandRegistrationDataForm extends InBandRegistrationForm {
 }
 
 class OutOfBandRegistrationForm extends InBandRegistrationForm {
-  OutOfBandRegistrationForm(this.url);
+  OutOfBandRegistrationForm({required this.url, required this.instructions});
 
   final String url;
+  final String? instructions;
 
   @override
   XMLNode toXml() => XMLNode(
@@ -110,10 +111,10 @@ class OutOfBandRegistrationForm extends InBandRegistrationForm {
           XMLNode(tag: 'url', text: url),
         ],
       );
-  
+
   @override
   OutOfBandRegistrationForm copyWith({String? username, String? password}) {
-    return OutOfBandRegistrationForm(url);
+    return this;
   }
 
   @override
@@ -155,7 +156,7 @@ class OutOfBandRegistrationForm extends InBandRegistrationForm {
       ? InBandRegistrationDataForm(dataForm)
       : null;
   final oobDataForm = oobData != null
-      ? OutOfBandRegistrationForm(oobData)
+      ? OutOfBandRegistrationForm(url: oobData, instructions: iqRegisterForm.instructions)
       : null;
   return (dataFormForm, iqRegisterForm, oobDataForm);
 }
