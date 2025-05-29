@@ -5,8 +5,8 @@ import 'package:moxxmpp/src/xeps/xep_0077/events.dart';
 import 'package:moxxmpp/src/xeps/xep_0077/helpers.dart';
 
 /// A function that handles an [InBandRegistrationForm] and returns the form to submit back to the server.
-/// A client should use this 
-typedef FormHandler = InBandRegistrationForm Function(InBandRegistrationForm form, [List<InBandRegistrationForm> alternatives]);
+/// A client should use this in [InBandRegistrationNegotiator.setFormHandler] to show the registration form to the user and return the filled form.
+typedef FormHandler = InBandRegistrationForm Function(InBandRegistrationForm form, {List<InBandRegistrationForm> alternatives, XmppError? lastError});
 
 /// A marker to indicate that this negotiator is for XEP-0077 (In-Band Registration).
 /// Mostly, this is a flag to tell [ClientToServerNegotiator] to accept incomplete authentication
@@ -16,8 +16,44 @@ mixin InBandRegistrationNegotiatorInterface {
 }
 /// A negotiator that implements XEP-0077 In-Band Registration for registering to an XMPP instant messaging server,
 /// according to [XEP-0077 section 3.1](https://xmpp.org/extensions/xep-0077.html#usecases-register).
-/// Set [attemptRegistration] to `true` before connecting to a server to switch to registration behaviors. 
 /// If the server does not support in-band registration, negotiation (and therefore the connection) will fail with an [InBandRegistrationSkippedError].
+/// 
+/// ## Usage
+/// > [!IMPORTANT]
+/// > You must start disconnected! This negotiator registers with a server. Connecting to a server without credentials won't work.
+/// 1. Register InBandRegistrationNegotiator with the connection:
+/// ```dart
+/// final connection = XmppConnection(...);
+/// await connection.registerFeatureNegotiators([InBandRegistrationNegotiator()]);
+/// ```
+/// You can keep the negotiator registered with the connection even if you don't want to register to a server at the moment.
+/// 2. When you want to register, set the [attemptRegistration] property to `true`:
+/// ```dart
+/// connection.getInBandRegistrationNegotiator()?.attemptRegistration = true;
+/// ```
+/// 3. Configure your registration form handlers. Read the [setFormHandler] documentation for more information.
+/// ```dart
+/// connection.getInBandRegistrationNegotiator()?.setFormHandler<SimpleInBandRegistrationForm>(
+///   (form, [alternatives]) {
+///     // Show the form here, and return the filled form.
+///     // You may offer the user the alternative forms in [alternatives] to choose from.
+///     return form;
+///   },
+/// );
+/// ```
+/// 4. Set the JID in connection settings to the domain of the server you want to register with:
+/// ```dart
+/// connection.connectionSettings = ConnectionSettings(jid: JID.fromDomain('example.com'));
+/// ```
+/// 5. Connect to the server as normal:
+/// ```dart
+/// await connection.connect(waitUntilLogin: true);
+/// ```
+/// > [!WARNING]
+/// > **Don't use a timeout on `.connect` when registering!** This will be awaited for however long registration takes.
+/// > If this completes successfully, you will be signed in with the new credentials!
+/// 
+/// {@category Feature Negotiators}
 class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBandRegistrationNegotiatorInterface {
   InBandRegistrationNegotiator()
       : super(200, false, inBandRegistrationXmlns, inBandRegistrationNegotiator);
@@ -30,8 +66,8 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
 
   final Map<Type, dynamic> _formHandlers = <Type, dynamic>{};
 
-  /// Register a form handler that will be called when the server sends a registration form.
-  /// Only the most recent handler of each type will be used. The type of handler will be picked
+  /// Set a form handler that will be called when the server sends a registration form.
+  /// Only the most recently added handler of each type will be used. The type of handler will be picked
   /// based on the precedence order in XEP-0077 Section 6 (as of XEP version 2.4).
   /// 
   /// If [OutOfBandRegistrationForm] is returned, the connection will be closed without reconnecting,
@@ -41,7 +77,7 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
   /// the connection will be reset and the client will be logged in with the new credentials.
   /// The new credentials will be sent with an [InBandRegistrationSuccessEvent] so that the client can
   /// persist them however you like.
-  void registerFormHandler<T extends InBandRegistrationForm>(FormHandler formHandler) {
+  void setFormHandler<T extends InBandRegistrationForm>(FormHandler formHandler) {
     _formHandlers[T] = formHandler;
   }
 
