@@ -75,6 +75,53 @@ class DataForm {
     required this.items,
     this.title,
   });
+
+  /// A Data Form of type `form`, which has fields to fill out.
+  /// Typically, these come from the server.
+  const DataForm.form({
+    required this.fields,
+    required this.instructions,
+    this.title,
+  })  : type = 'form',
+        reported = const [],
+        items = const [];
+
+  /// A Data Form of type `submit`, which has filled-out fields.
+  /// Typically, these are sent to the server.
+  const DataForm.submit({
+    required this.fields,
+  })  : type = 'submit',
+        instructions = const [],
+        reported = const [],
+        items = const [],
+        title = null;
+
+  /// A Data Form of type `cancel`.
+  /// 
+  /// XEP-0004 describes this form type as:
+  /// > The form-submitting entity has cancelled submission of data to the form-processing entity.
+  /// 
+  /// ...and nothing more.
+  const DataForm.cancel()
+      : type = 'cancel',
+        instructions = const [],
+        fields = const [],
+        reported = const [],
+        items = const [],
+        title = null;
+
+  /// A Data Form of type `result`, which contains the results of a form submission.
+  /// Typically, these are received from the server after submitting a form.
+  /// This type also contains `reported` and `items`. You'll want to read section 3.4
+  /// of XEP-0004 for more information on how these are used.
+  const DataForm.result({
+    this.fields = const [],
+    this.instructions = const [],
+    this.reported = const [],
+    this.items = const [],
+    this.title,
+  }) : type = 'result';
+
   final String type;
   final String? title;
   final List<String> instructions;

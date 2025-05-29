@@ -1,3 +1,4 @@
+import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:moxxmpp/moxxmpp.dart';
 
@@ -33,6 +34,8 @@ class SimpleInBandRegistrationForm extends InBandRegistrationForm {
     return true;
   }
 
+  String? get instructions => data['instructions'];
+
   @override
   XMLNode toXml() {
     final children = <XMLNode>[];
@@ -60,9 +63,15 @@ class SimpleInBandRegistrationForm extends InBandRegistrationForm {
 }
 
 class InBandRegistrationDataForm extends InBandRegistrationForm {
-  InBandRegistrationDataForm(this.form);
+  InBandRegistrationDataForm(this.form) : isProxy = false;
+
+  InBandRegistrationDataForm.proxy(SimpleInBandRegistrationForm form)
+      : form = createProxyRegistrationForm(form),
+        isProxy = true;
 
   final DataForm form;
+  /// Whether this form is emulated from iq:register fields.
+  final bool isProxy;
 
   @override
   XMLNode toXml() => form.toXml();
@@ -149,4 +158,49 @@ class OutOfBandRegistrationForm extends InBandRegistrationForm {
       ? OutOfBandRegistrationForm(oobData)
       : null;
   return (dataFormForm, iqRegisterForm, oobDataForm);
+}
+
+const Set<String> _knownIqRegisterFields = {
+  'username',
+  'password',
+  'name',
+  'email',
+  'first',
+  'last',
+  'address',
+  'city',
+  'state',
+  'zip',
+  'phone',
+  'url',
+  'date',
+  'misc',
+  'text',
+  'key',
+};
+DataForm createProxyRegistrationForm(SimpleInBandRegistrationForm form) {
+  final fields = [
+    const DataFormField(varAttr: 'FORM_TYPE', type: 'hidden', values: ['jabber:iq:register'], isRequired: true, options: []),
+    for (final entry in form.data.entries) switch (entry.key) {
+      'x' => null,
+      'instructions' => null,
+      'password' => DataFormField(varAttr: 'password', values: [entry.value], isRequired: form.needed?.contains('password') ?? false, options: []),
+      _ when _knownIqRegisterFields.contains(entry.key) => DataFormField(varAttr: entry.key, values: [entry.value], isRequired: true, options: []),
+      _ => (() {
+        Logger('createProxyRegistrationForm')
+            .warning("Unknown iq:register field '${entry.key}', using it as a custom field.");
+        return DataFormField(varAttr: entry.key, values: [entry.value], isRequired: true, options: []);
+      })(),
+    },
+  ].nonNulls.toList();
+  if (form.needed?.isEmpty ?? true) {
+    return DataForm.submit(fields: fields);
+  } else {
+    return DataForm.form(
+      fields: fields,
+      instructions: form.data['instructions'] != null
+          ? [form.data['instructions']!]
+          : [],
+    );
+  }
 }

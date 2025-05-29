@@ -121,17 +121,19 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
     final (dataForm, iqRegisterForm, oobForm) = parseRegistrationForm(query);
     // The "send result back" function
     Result<NegotiatorState, NegotiatorError> sendResult(InBandRegistrationForm result) {
+      final id = attributes.getConnection().generateId();
       void send(XMLNode node) {
         attributes.sendNonza(Stanza.iq(
           to: attributes.getConnectionSettings().jid.domain,
           type: 'set',
-          id: attributes.getConnection().generateId(),
+          id: id,
           xmlns: 'jabber:client',
           children: [
             node,
           ],
         ),);
       }
+      _transactions.add(InBandRegistrationTransaction(id, form: result));
       switch (result) {
         case SimpleInBandRegistrationForm _:
           _logger.fine('Sending filled iq:register form', result.toXml().toXml());
