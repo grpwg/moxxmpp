@@ -185,8 +185,8 @@ DataForm createProxyRegistrationForm(SimpleInBandRegistrationForm form) {
     for (final entry in form.data.entries) switch (entry.key) {
       'x' => null,
       'instructions' => null,
-      'password' => DataFormField(varAttr: 'password', values: [entry.value], isRequired: form.needed?.contains('password') ?? false, options: []),
-      _ when _knownIqRegisterFields.contains(entry.key) => DataFormField(varAttr: entry.key, values: [entry.value], isRequired: true, options: []),
+      'password' => DataFormField(varAttr: 'password', type: 'text-private', values: [entry.value], isRequired: form.needed?.contains('password') ?? false, options: []),
+      _ when _knownIqRegisterFields.contains(entry.key) => DataFormField(varAttr: entry.key, type: 'text-single', values: [entry.value], isRequired: true, options: []),
       _ => (() {
         Logger('createProxyRegistrationForm')
             .warning("Unknown iq:register field '${entry.key}', using it as a custom field.");
