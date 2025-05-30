@@ -149,9 +149,6 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
           return const Result(NegotiatorState.skipRest);
       }
     }
-    // TODO: create a proxy registration data form, if needed
-    // If there is no handler for iq:register and we need it, but there is one for data forms, convert the iq:register form to a data form.
-    // That way, clients can implement the data form handler and still support iq:register completely transparently.
     if (dataForm != null && _formHandlers.containsKey(InBandRegistrationDataForm)) {
       // Try data form 
       final result = await _formHandlers[InBandRegistrationDataForm]!(dataForm, alternatives: [
@@ -162,6 +159,12 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
     } else if ((iqRegisterForm.needed?.isNotEmpty ?? false) && _formHandlers.containsKey(SimpleInBandRegistrationForm)) {
       // Try iq:register form
       final result = await _formHandlers[SimpleInBandRegistrationForm]!(iqRegisterForm, alternatives: [
+        dataForm, oobForm,
+      ].whereType<InBandRegistrationForm>().toList(), lastError: error,);
+      return sendResult(result);
+    } else if ((iqRegisterForm.needed?.isNotEmpty ?? false) && _formHandlers.containsKey(InBandRegistrationDataForm)) {
+      // Try iq:register form as data form
+      final result = await _formHandlers[InBandRegistrationDataForm]!(InBandRegistrationDataForm.proxy(iqRegisterForm), alternatives: [
         dataForm, oobForm,
       ].whereType<InBandRegistrationForm>().toList(), lastError: error,);
       return sendResult(result);
@@ -194,11 +197,6 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
         'You will not be able to register to many servers without it. '
         'If you did not intend to register, set attemptRegistration to false.');
     assert(_formHandlers.containsKey(OutOfBandRegistrationForm), 'InBandRegistrationNegotiator must have a form handler for OutOfBandRegistrationForm to work properly. '
-        'You will not be able to register to many servers without it. '
-        'If you did not intend to register, set attemptRegistration to false.');
-    // TODO: see above TODO about the proxy iq:register -> x:data form
-    // This assertion will go away once that is implemented.
-    assert(_formHandlers.containsKey(SimpleInBandRegistrationForm), 'InBandRegistrationNegotiator must have a form handler for SimpleInBandRegistrationForm to work properly. '
         'You will not be able to register to many servers without it. '
         'If you did not intend to register, set attemptRegistration to false.');
     // TODO(halscode): I'm still not sure if "ready" or "retryLater" is the right state to return.
