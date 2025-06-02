@@ -178,12 +178,12 @@ class ClientToServerNegotiator extends NegotiationsHandler {
             _currentNegotiator = getNextNegotiator(_streamFeatures);
             log.finest('Chose ${_currentNegotiator!.id} as next negotiator');
 
-            final fakeStanza = XMLNode(
-              tag: 'stream:features',
-              children: _streamFeatures,
-            );
+            // final fakeStanza = XMLNode(
+            //   tag: 'stream:features',
+            //   children: _streamFeatures,
+            // );
 
-            await _executeCurrentNegotiator(fakeStanza);
+            await _executeCurrentNegotiator(nonza);
           }
         }
         break;
@@ -200,11 +200,11 @@ class ClientToServerNegotiator extends NegotiationsHandler {
           log.finest('Picking new negotiator...');
           _currentNegotiator = getNextNegotiator(_streamFeatures);
           log.finest('Chose $_currentNegotiator as next negotiator');
-          final fakeStanza = XMLNode(
-            tag: 'stream:features',
-            children: _streamFeatures,
-          );
-          await _executeCurrentNegotiator(fakeStanza);
+          // final fakeStanza = XMLNode(
+          //   tag: 'stream:features',
+          //   children: _streamFeatures,
+          // );
+          await _executeCurrentNegotiator(nonza);
         }
         break;
       case NegotiatorState.skipRest:
