@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
 import 'package:moxlib/moxlib.dart';
 import 'package:moxxmpp/moxxmpp.dart';
@@ -81,7 +82,7 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
   bool attemptRegistration = false;
   bool _matched = false;
 
-  final Map<Type, FormHandler> _formHandlers = <Type, FormHandler>{};
+  final Map<Type, dynamic> _formHandlers = <Type, dynamic>{};
 
   /// Contains a list of transactions that are currently in progress (that is, waiting for a response from the server).
   /// Realistically, there should only be one... you are in uncharted territory if this gets any bigger.
@@ -100,8 +101,12 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
   /// The new credentials will be sent with an [InBandRegistrationSuccessEvent] so that the client can
   /// persist them however you like.
   void setFormHandler<T extends InBandRegistrationForm>(FormHandler<T> formHandler) {
-    _formHandlers[T] = formHandler as FormHandler;
+    _formHandlers[T] = formHandler;
   }
+  FormHandler<T>? _getFormHandler<T extends InBandRegistrationForm>() {
+    return _formHandlers[T] as FormHandler<T>?;
+  }
+  
 
   @override
   bool matchesFeature(List<XMLNode> features) {
@@ -109,12 +114,7 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
       (feature) => (feature.xmlns == inBandRegistrationXmlns || feature.xmlns == 'http://jabber.org/features/iq-register') && feature.tag == 'register',
     );
     _matched = matched;
-    if (!matched && attemptRegistration) {
-      // The client requested registration, but the server does not support it.
-      // Pretend the feature matched so that a better error can be shown.
-      return true;
-    }
-    return matched;
+    return attemptRegistration;
   }
 
   Future<Result<NegotiatorState, NegotiatorError>> _handleFormResult(XMLNode query, [dynamic error]) async {
@@ -146,31 +146,35 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
         case OutOfBandRegistrationForm _:
           _logger.fine('OOB returned; disconnecting and cancelling', result.toXml().toXml());
           attributes.getConnection().disconnect();
-          return const Result(NegotiatorState.skipRest);
+          return const Result(NegotiatorState.done);
       }
     }
     if (dataForm != null && _formHandlers.containsKey(InBandRegistrationDataForm)) {
-      // Try data form 
-      final result = await _formHandlers[InBandRegistrationDataForm]!(dataForm, alternatives: [
+      // Try data form
+      _logger.fine('Data form received, handling it');
+      final result = await _getFormHandler<InBandRegistrationDataForm>()!(dataForm, alternatives: [
         iqRegisterForm, oobForm,
       ].whereType<InBandRegistrationForm>().toList(), lastError: error,);
       // Send the result back
       return sendResult(result);
     } else if ((iqRegisterForm.needed?.isNotEmpty ?? false) && _formHandlers.containsKey(SimpleInBandRegistrationForm)) {
       // Try iq:register form
-      final result = await _formHandlers[SimpleInBandRegistrationForm]!(iqRegisterForm, alternatives: [
+      _logger.fine('iq:register form received, handling it');
+      final result = await _getFormHandler<SimpleInBandRegistrationForm>()!(iqRegisterForm, alternatives: [
         dataForm, oobForm,
       ].whereType<InBandRegistrationForm>().toList(), lastError: error,);
       return sendResult(result);
     } else if ((iqRegisterForm.needed?.isNotEmpty ?? false) && _formHandlers.containsKey(InBandRegistrationDataForm)) {
       // Try iq:register form as data form
-      final result = await _formHandlers[InBandRegistrationDataForm]!(InBandRegistrationDataForm.proxy(iqRegisterForm), alternatives: [
-        dataForm, oobForm,
+      _logger.fine('iq:register form received, handling it via proxy data form');
+      final result = await _getFormHandler<InBandRegistrationDataForm>()!(InBandRegistrationDataForm.proxy(iqRegisterForm), alternatives: [
+        iqRegisterForm, dataForm, oobForm,
       ].whereType<InBandRegistrationForm>().toList(), lastError: error,);
       return sendResult(result);
     } else if (oobForm != null && _formHandlers.containsKey(OutOfBandRegistrationForm)) {
       // Try out-of-band registration
-      final result = await _formHandlers[OutOfBandRegistrationForm]!(oobForm, alternatives: [
+      _logger.fine('Out-of-band registration form received, handling it');
+      final result = await _getFormHandler<OutOfBandRegistrationForm>()!(oobForm, alternatives: [
         dataForm, iqRegisterForm,
       ].whereType<InBandRegistrationForm>().toList(), lastError: error,);
       return sendResult(result);
@@ -181,12 +185,14 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
 
   Future<Result<NegotiatorState, NegotiatorError>> _handleSuccess(InBandRegistrationForm form) async {
     // TODO: set new credentials in ConnectionSettings (using the JID and password from the registration form)
-    final newJid = JID(form.username??'', attributes.getFullJID().domain, '');
+    final newJid = JID(form.username??'', attributes.getConnectionSettings().jid.domain, '');
     attributes.getConnection().connectionSettings = ConnectionSettings(jid: newJid, password: form.password??'');
     attemptRegistration = false;
-    _sendStreamHeaderWhenDone = true;
     unawaited(attributes.sendEvent(InBandRegistrationSuccessEvent(newJid, form.password??'')));
-    return const Result(NegotiatorState.skipRest);
+    // Force reconnect so that the new credentials can be used.
+    //_sendStreamHeaderWhenDone = true;
+    //await attributes.getConnection().reconnectionPolicy.performReconnect?.call();
+    return const Result(NegotiatorState.done);
   }
 
   @override
@@ -203,27 +209,54 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
     // The intended behavior is that it will call this handler again on the next nonza.
     // Ready seems to do that, but if there are any other negotiators ready, it looks like it will skip them.
     // But retryLater ends up calling another handler _without this same nonza_, which is really odd behavior.
-    if (!_transactions.any((tx) => tx.id == nonza.attributes['id'])) {
+    if (_transactions.isNotEmpty && !_transactions.any((tx) => tx.id == nonza.attributes['id'])) {
       // If we don't have an expected ID, this is not a response to our request
-      return const Result(NegotiatorState.ready);
+      return const Result(NegotiatorState.retryLater);
     }
-    final transaction = _transactions.firstWhere((tx) => tx.id == nonza.attributes['id']);
-    if (nonza case XMLNode(tag: 'iq', attributes: {'type': 'result' || 'error'})) {
+    final transaction = _transactions.firstWhereOrNull((tx) => tx.id == nonza.attributes['id']);
+    if (_transactions.isEmpty) {
+      // Get initial form or registration fields
+      final id = attributes.getConnection().generateId();
+      _transactions.add(InBandRegistrationTransaction(id));
+      attributes.sendNonza(Stanza.iq(
+        to: attributes.getConnectionSettings().jid.domain,
+        type: 'get',
+        id: id,
+        xmlns: 'jabber:client',
+        children: [
+          XMLNode.xmlns(
+            tag: 'query',
+            xmlns: inBandRegistrationXmlns,
+          ),
+        ],
+      ),);
+      // This _should_ be called again on the next nonza...
+      return const Result(NegotiatorState.ready);
+    } else if (nonza case XMLNode(tag: 'iq', attributes: {'type': 'result' || 'error'})) {
       _transactions.removeWhere((tx) => tx.id == nonza.attributes['id']);
       if (nonza.firstTag('error') case final XMLNode error) {
         // The server returned an error
-        if (error.attributes['type'] == 'modify') {
+        if (error.attributes['type'] == 'modify' || error.firstTag('not-acceptable', xmlns: 'urn:ietf:params:xml:ns:xmpp-stanzas') != null) {
+          // If the error is of type "modify" or has <not-acceptable>, we can assume that the form is invalid (user input).
           if (nonza.firstTagByXmlns(inBandRegistrationXmlns) case final XMLNode query) {
             // Show the form again, but with the error
             return _handleFormResult(query, InBandRegistrationInvalidFormError.fromStanza(nonza));
           }
-          // If the error is of type "modify", we can assume that the form is invalid (user input).
-          // We don't have the form, 
           return Result(InBandRegistrationInvalidFormError.fromStanza(nonza));
         }
-        // If the error is not of type "modify", we can assume that the registration failed
-        // and will not succeed at this time.
+        if (error.firstTag('conflict', xmlns: 'urn:ietf:params:xml:ns:xmpp-stanzas') != null) {
+          // The server said that the requested username is already in use.
+          _logger.warning('Username already in use');
+          if (nonza.firstTagByXmlns(inBandRegistrationXmlns) case final XMLNode query) {
+            // Show the form again, but with the error
+            return _handleFormResult(query, InBandRegistrationInvalidFormError.fromStanza(nonza));
+          }
+          return const Result(InBandRegistrationConflictError());
+        }
+        // The error didn't match any of the above conditions. 
+        // We can assume that the registration failed and will not succeed at this time.
         // If we got to this point we know the server supports IBR, so there's probably a reason
+        // it didn't work here (maybe because the server requires invite preauth).
         _logger.severe('Registration failed with error: $error');
         if (error.firstTag('text') case final XMLNode text) {
           // If the error has a text, use it as the reason
@@ -241,11 +274,11 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
           // A more likely scenario is that no credentials are given to us, the ones we used were accepted, and
           // this is the success message.
           final (dataForm, iqRegisterForm, _) = parseRegistrationForm(query);
-          if (transaction.form == null && dataForm == null && (iqRegisterForm.username == null || iqRegisterForm.password == null)) {
+          if (transaction?.form == null && dataForm == null && (iqRegisterForm.username == null || iqRegisterForm.password == null)) {
             _logger.warning("No credentials found in registration form, but server says we're already registered. Proceeding as if we're already authenticated.");
             return const Result(NegotiatorState.skipRest);
           }
-          var form = transaction.form ?? dataForm ?? iqRegisterForm;
+          var form = transaction?.form ?? dataForm ?? iqRegisterForm;
           if (dataForm != null) {
             form = form.copyWith(
               username: dataForm.username,
@@ -265,33 +298,15 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
         // An empty `<iq type="result"/>` stanza, using an ID corresponding to a registration request (already checked),
         // means that the server has registered the user successfully.
         _logger.fine('Empty iq:result received, assuming registration success');
-        if (transaction.form == null) {
+        if (transaction?.form == null) {
           return const Result(InBandRegistrationFailedError('No credentials, and empty result. XEP-0077 says to treat this as a success, but this is not very useful without credentials to sign in with.'));
         }
-        return _handleSuccess(transaction.form!);
+        return _handleSuccess(transaction!.form!);
       } else {
         return const Result(NegotiatorState.ready);
       }
-    } else if (_transactions.isEmpty) {
-      // Get initial form or registration fields
-      final id = attributes.getConnection().generateId();
-      _transactions.add(InBandRegistrationTransaction(id));
-      attributes.sendNonza(Stanza.iq(
-        to: attributes.getConnectionSettings().jid.domain,
-        type: 'get',
-        id: id,
-        xmlns: 'jabber:client',
-        children: [
-          XMLNode.xmlns(
-            tag: 'query',
-            xmlns: inBandRegistrationXmlns,
-          ),
-        ],
-      ),);
-      // This _should_ be called again on the next nonza...
-      return const Result(NegotiatorState.ready);
     }
-    return const Result(NegotiatorState.ready);
+    return const Result(NegotiatorState.retryLater);
   }
 
   bool _sendStreamHeaderWhenDone = false;
@@ -300,7 +315,8 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
 
   @override void reset() {
     _sendStreamHeaderWhenDone = false;
-    attemptRegistration = false;
+    _transactions.clear();
+    //attemptRegistration = false;
     super.reset();
   }
 }

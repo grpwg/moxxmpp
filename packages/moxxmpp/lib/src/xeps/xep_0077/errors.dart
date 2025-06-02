@@ -58,3 +58,14 @@ class InBandRegistrationStanzaError implements NegotiatorError {
   @override
   String toString() => 'InBandRegistrationStanzaError: $error';
 }
+
+/// The server said that the requested username is already in use.
+class InBandRegistrationConflictError implements NegotiatorError {
+  const InBandRegistrationConflictError();
+
+  @override
+  bool isRecoverable() => false;
+
+  @override
+  String toString() => 'InBandRegistrationConflictError: Username already in use.';
+}

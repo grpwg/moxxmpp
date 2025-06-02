@@ -62,12 +62,8 @@ class ClientToServerNegotiator extends NegotiationsHandler {
 
   @override
   void sendStreamHeader() {
+    final registrationNegotiator = negotiators.values.whereType<InBandRegistrationNegotiatorInterface>().firstOrNull;
     resetStreamParser();
-    final registrationNegotiator = negotiators.values.firstWhereOrNull(
-            (XmppFeatureNegotiatorBase negotiator) =>
-                // ignore: require_trailing_commas
-                negotiator is InBandRegistrationNegotiatorInterface)
-        as InBandRegistrationNegotiatorInterface?;
     sendNonza(
       XMLNode(
         tag: 'xml',
