@@ -901,15 +901,26 @@ class XmppConnection {
     _socket.prepareDisconnect();
 
     if (triggeredByUser) {
-      sendRawString('</stream:stream>');
+      try {
+        sendRawString('</stream:stream>');
+      // ignore: avoid_catching_errors, empty_catches
+      } on StateError {}
     }
 
     await _setConnectionState(state);
     _socket.close();
 
     if (triggeredByUser) {
-      // Clear Stream Management state, if available
-      await getStreamManagementManager()?.resetState();
+      try {
+        // Clear Stream Management state, if available
+        await getStreamManagementManager()?.resetState();
+      // ignore: avoid_catching_errors, empty_catches
+      } on StateError {}
+      try {
+        // Reset negotiation handler
+        _negotiationsHandler.reset();
+      // ignore: avoid_catching_errors, empty_catches
+      } on StateError {}
     }
   }
 
