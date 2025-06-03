@@ -236,22 +236,32 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
       _transactions.removeWhere((tx) => tx.id == nonza.attributes['id']);
       if (nonza.firstTag('error') case final XMLNode error) {
         // The server returned an error
-        if (error.attributes['type'] == 'modify' || error.firstTag('not-acceptable', xmlns: 'urn:ietf:params:xml:ns:xmpp-stanzas') != null) {
-          // If the error is of type "modify" or has <not-acceptable>, we can assume that the form is invalid (user input).
-          if (nonza.firstTagByXmlns(inBandRegistrationXmlns) case final XMLNode query) {
-            // Show the form again, but with the error
-            return _handleFormResult(query, InBandRegistrationInvalidFormError.fromStanza(nonza));
-          }
-          return Result(InBandRegistrationInvalidFormError.fromStanza(nonza));
-        }
         if (error.firstTag('conflict', xmlns: 'urn:ietf:params:xml:ns:xmpp-stanzas') != null) {
           // The server said that the requested username is already in use.
           _logger.warning('Username already in use');
           if (nonza.firstTagByXmlns(inBandRegistrationXmlns) case final XMLNode query) {
             // Show the form again, but with the error
-            return _handleFormResult(query, InBandRegistrationInvalidFormError.fromStanza(nonza));
+            return _handleFormResult(query, const InBandRegistrationConflictError());
+          } else if (transaction?.originalForm != null) {
+            // If we don't have a query, but we have a transaction, we can assume that the form is invalid
+            // and we can show it again.
+            _logger.warning("Didn't get a form with the error, reusing the last one");
+            return _handleFormResult(transaction!.originalForm!.toXml(), const InBandRegistrationConflictError());
           }
           return const Result(InBandRegistrationConflictError());
+        }
+        if (error.attributes['type'] == 'modify' || error.firstTag('not-acceptable', xmlns: 'urn:ietf:params:xml:ns:xmpp-stanzas') != null) {
+          // If the error is of type "modify" or has <not-acceptable>, we can assume that the form is invalid (user input).
+          if (nonza.firstTagByXmlns(inBandRegistrationXmlns) case final XMLNode query) {
+            // Show the form again, but with the error
+            return _handleFormResult(query, InBandRegistrationInvalidFormError.fromStanza(nonza));
+          } else if (transaction?.originalForm != null) {
+            // If we don't have a query, but we have a transaction, we can assume that the form is invalid
+            // and we can show it again.
+            _logger.warning("Didn't get a form with the error, reusing the last one");
+            return _handleFormResult(transaction!.originalForm!.toXml(), InBandRegistrationInvalidFormError.fromStanza(nonza));
+          }
+          return Result(InBandRegistrationInvalidFormError.fromStanza(nonza));
         }
         // The error didn't match any of the above conditions. 
         // We can assume that the registration failed and will not succeed at this time.
