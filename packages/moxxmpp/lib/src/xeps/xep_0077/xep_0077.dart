@@ -120,7 +120,7 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
   Future<Result<NegotiatorState, NegotiatorError>> _handleFormResult(XMLNode query, [dynamic error]) async {
     final (dataForm, iqRegisterForm, oobForm) = parseRegistrationForm(query);
     // The "send result back" function
-    Result<NegotiatorState, NegotiatorError> sendResult(InBandRegistrationForm result) {
+    Result<NegotiatorState, NegotiatorError> sendResult(InBandRegistrationForm result, {required InBandRegistrationForm original}) {
       final id = attributes.getConnection().generateId();
       void send(XMLNode node) {
         attributes.sendNonza(Stanza.iq(
@@ -133,7 +133,7 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
           ],
         ),);
       }
-      _transactions.add(InBandRegistrationTransaction(id, form: result));
+      _transactions.add(InBandRegistrationTransaction(id, form: result, originalForm: original));
       switch (result) {
         case SimpleInBandRegistrationForm _:
           _logger.fine('Sending filled iq:register form', result.toXml().toXml());
@@ -156,28 +156,28 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
         iqRegisterForm, oobForm,
       ].whereType<InBandRegistrationForm>().toList(), lastError: error,);
       // Send the result back
-      return sendResult(result);
+      return sendResult(result, original: dataForm);
     } else if ((iqRegisterForm.needed?.isNotEmpty ?? false) && _formHandlers.containsKey(SimpleInBandRegistrationForm)) {
       // Try iq:register form
       _logger.fine('iq:register form received, handling it');
       final result = await _getFormHandler<SimpleInBandRegistrationForm>()!(iqRegisterForm, alternatives: [
         dataForm, oobForm,
       ].whereType<InBandRegistrationForm>().toList(), lastError: error,);
-      return sendResult(result);
+      return sendResult(result, original: iqRegisterForm);
     } else if ((iqRegisterForm.needed?.isNotEmpty ?? false) && _formHandlers.containsKey(InBandRegistrationDataForm)) {
       // Try iq:register form as data form
       _logger.fine('iq:register form received, handling it via proxy data form');
       final result = await _getFormHandler<InBandRegistrationDataForm>()!(InBandRegistrationDataForm.proxy(iqRegisterForm), alternatives: [
         iqRegisterForm, dataForm, oobForm,
       ].whereType<InBandRegistrationForm>().toList(), lastError: error,);
-      return sendResult(result);
+      return sendResult(result, original: iqRegisterForm);
     } else if (oobForm != null && _formHandlers.containsKey(OutOfBandRegistrationForm)) {
       // Try out-of-band registration
       _logger.fine('Out-of-band registration form received, handling it');
       final result = await _getFormHandler<OutOfBandRegistrationForm>()!(oobForm, alternatives: [
         dataForm, iqRegisterForm,
       ].whereType<InBandRegistrationForm>().toList(), lastError: error,);
-      return sendResult(result);
+      return sendResult(result, original: oobForm);
     } else {
       return const Result(InBandRegistrationFailedError('No form handler available for registration form.'));
     }
