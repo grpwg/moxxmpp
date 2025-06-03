@@ -236,6 +236,35 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
       _transactions.removeWhere((tx) => tx.id == nonza.attributes['id']);
       if (nonza.firstTag('error') case final XMLNode error) {
         // The server returned an error
+        var filledForm = transaction?.originalForm?.copyWith(
+          username: transaction.form?.username,
+          password: transaction.form?.password,
+        );
+        if (transaction?.originalForm case final InBandRegistrationDataForm originalForm) {
+          // If we have an original form, we can fill it with the data from the transaction
+          if (transaction?.form case final InBandRegistrationDataForm form) {
+            filledForm = InBandRegistrationDataForm(DataForm(
+              type: originalForm.form.type,
+              fields: originalForm.form.fields.map((field) {
+                final filledField = form.form.fields.firstWhereOrNull((f) => f.varAttr == field.varAttr);
+                return DataFormField(
+                  values: filledField?.values ?? field.values,
+                  // Copied from the original form
+                  options: field.options,
+                  isRequired: field.isRequired,
+                  description: field.description,
+                  label: field.label,
+                  varAttr: field.varAttr,
+                  type: field.type,
+                );
+              }).toList(),
+              instructions: originalForm.form.instructions,
+              title: originalForm.form.title,
+              items: originalForm.form.items,
+              reported: originalForm.form.reported,
+            ),);
+          }
+        }
         if (error.firstTag('conflict', xmlns: 'urn:ietf:params:xml:ns:xmpp-stanzas') != null) {
           // The server said that the requested username is already in use.
           _logger.warning('Username already in use');
@@ -246,7 +275,7 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
             // If we don't have a query, but we have a transaction, we can assume that the form is invalid
             // and we can show it again.
             _logger.warning("Didn't get a form with the error, reusing the last one");
-            return _handleFormResult(transaction!.originalForm!.toXml(), const InBandRegistrationConflictError());
+            return _handleFormResult(filledForm!.toXml(), const InBandRegistrationConflictError());
           }
           return const Result(InBandRegistrationConflictError());
         }
@@ -259,7 +288,7 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
             // If we don't have a query, but we have a transaction, we can assume that the form is invalid
             // and we can show it again.
             _logger.warning("Didn't get a form with the error, reusing the last one");
-            return _handleFormResult(transaction!.originalForm!.toXml(), InBandRegistrationInvalidFormError.fromStanza(nonza));
+            return _handleFormResult(filledForm!.toXml(), InBandRegistrationInvalidFormError.fromStanza(nonza));
           }
           return Result(InBandRegistrationInvalidFormError.fromStanza(nonza));
         }
