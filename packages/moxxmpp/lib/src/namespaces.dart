@@ -46,6 +46,7 @@ const oobDataXmlns = 'jabber:x:oob';
 
 // XEP-0077
 const inBandRegistrationXmlns = 'jabber:iq:register';
+const inBandRegistrationStreamFeatureXmlns = 'http://jabber.org/features/iq-register';
 
 // XEP-0084
 const userAvatarDataXmlns = 'urn:xmpp:avatar:data';

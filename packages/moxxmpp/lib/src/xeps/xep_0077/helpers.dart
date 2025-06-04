@@ -95,6 +95,23 @@ class InBandRegistrationDataForm extends InBandRegistrationForm {
 
   @override
   String? get username => form.getFieldByVar('username')?.values.first;
+
+  SimpleInBandRegistrationForm toIqRegisterForm() {
+    assert(isProxy, 'Only proxy forms should be converted to iq:register forms.');
+    final data = <String, String>{};
+    final needed = <String>[];
+    for (final field in form.fields) {
+      if (field.varAttr == null) continue;
+      if (field.varAttr == 'FORM_TYPE' || field.varAttr == 'instructions' || field.type == 'hidden') continue;
+      if (field.values.isNotEmpty) {
+        data[field.varAttr!] = field.values.first;
+      }
+      if (field.values.isEmpty) {
+        needed.add(field.varAttr!);
+      }
+    }
+    return SimpleInBandRegistrationForm(data: data, needed: needed);
+  }
 }
 
 class OutOfBandRegistrationForm extends InBandRegistrationForm {
