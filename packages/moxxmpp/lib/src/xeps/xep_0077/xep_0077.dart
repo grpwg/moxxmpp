@@ -194,16 +194,6 @@ mixin InBandRegistrationMixin {
   }
 }
 
-// TODO: refactor the negotiator processing stuff to a mixin, and "with" that mixin to both this negotiator and a manager.
-// That way, the common logic of processing the iq stanzas is shared. The differences to be accounted for include:
-// - Triggering registration: the negotiator requires a flag & registered handlers, the manager will use a method & callbacks
-// - How stanzas are received: negotiators use the `negotiate` method, while managers use the `incomingStanzaHandlers` list
-// - How stanzas are sent: negotiators use non-awaitable `sendNonza`, while managers use awaitable `sendStanza`
-// - Managers only need one incoming stanza handler, since they can await the server response
-//
-// The negotiator handles registering to an XMPP IM server, while the manager will handle registering to remote servers
-// such as gateways.
-
 /// A negotiator that implements XEP-0077 In-Band Registration for registering to an XMPP instant messaging server,
 /// according to [XEP-0077 section 3.1](https://xmpp.org/extensions/xep-0077.html#usecases-register).
 /// If the server does not support in-band registration, negotiation (and therefore the connection) will fail with an [InBandRegistrationSkippedError].
@@ -325,7 +315,6 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
   }
 
   Future<Result<NegotiatorState, NegotiatorError>> _handleSuccess(InBandRegistrationForm form) async {
-    // TODO: set new credentials in ConnectionSettings (using the JID and password from the registration form)
     final newJid = JID(form.username??'', attributes.getConnectionSettings().jid.domain, '');
     attributes.getConnection().connectionSettings = ConnectionSettings(jid: newJid, password: form.password??'');
     attemptRegistration = false;
