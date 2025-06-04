@@ -275,6 +275,9 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
   FormHandler<T>? _getFormHandler<T extends InBandRegistrationForm>() {
     return _formHandlers[T] as FormHandler<T>?;
   }
+  void unsetFormHandlers() {
+    _formHandlers.clear();
+  }
 
   @override
   bool matchesFeature(List<XMLNode> features) {
@@ -289,6 +292,7 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
   FutureOr<void> cancelRegistration() {
     state = NegotiatorState.done;
     _inProgress = false;
+    _formHandlers.clear();
     attributes.getConnection().disconnect();
   }
 
@@ -324,6 +328,7 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
     attributes.getConnection().connectionSettings = ConnectionSettings(jid: newJid, password: form.password??'');
     attemptRegistration = false;
     _inProgress = false;
+    _formHandlers.clear();
     unawaited(attributes.sendEvent(InBandRegistrationSuccessEvent(newJid, form.password??'')));
     // Force reconnect so that the new credentials can be used.
     //_sendStreamHeaderWhenDone = true;
