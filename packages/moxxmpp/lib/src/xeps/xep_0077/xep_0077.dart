@@ -16,6 +16,9 @@ abstract class InBandRegistrationNegotiatorInterface {
   bool get attemptRegistration;
 }
 
+/// A mixin that implements the common functionality for [InBandRegistrationNegotiator] and [InBandRegistrationManager].
+/// You probably don't want to use this mixin directly, but rather extend the [InBandRegistrationNegotiator] or [InBandRegistrationManager] classes.
+@protected
 mixin InBandRegistrationMixin {
   /// Nonzas will be sent and awaited with this.
   /// It must be able to track the ID of the stanza sent, so that it can match the response to the request.
@@ -198,6 +201,8 @@ mixin InBandRegistrationMixin {
 /// according to [XEP-0077 section 3.1](https://xmpp.org/extensions/xep-0077.html#usecases-register).
 /// If the server does not support in-band registration, negotiation (and therefore the connection) will fail with an [InBandRegistrationSkippedError].
 /// 
+/// If you want to register with a remote service using an account you are already connected to, use [InBandRegistrationManager] instead.
+/// 
 /// ## Usage
 /// > [!IMPORTANT]
 /// > You must start disconnected! This negotiator registers with a server. Connecting to a server without credentials won't work.
@@ -230,7 +235,7 @@ mixin InBandRegistrationMixin {
 /// await connection.connect(waitUntilLogin: true);
 /// ```
 /// > [!WARNING]
-/// > **Don't use a timeout on `.connect` when registering!** This will be awaited for however long registration takes.
+/// > **Don't use a timeout on `.connect` or XmppConnection when registering!** This will be awaited for however long registration takes.
 /// > If this completes successfully, you will be signed in with the new credentials!
 /// 
 /// {@category Feature Negotiators}
