@@ -252,6 +252,7 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
   bool attemptRegistration = false;
   bool _matched = false;
   bool _inProgress = false;
+  bool _waitingForSecure = false;
 
   final Map<Type, dynamic> _formHandlers = <Type, dynamic>{};
 
@@ -281,6 +282,13 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
 
   @override
   bool matchesFeature(List<XMLNode> features) {
+    if (_waitingForSecure) {
+      _waitingForSecure = false;
+      state = NegotiatorState.ready;
+    }
+    if (features.isEmpty || !attributes.getSocket().isSecure()) {
+      return false;
+    }
     final matched = features.any(
       (feature) => (feature.xmlns == inBandRegistrationXmlns || feature.xmlns == inBandRegistrationStreamFeatureXmlns) && feature.tag == 'register',
     );
@@ -352,7 +360,18 @@ class InBandRegistrationNegotiator extends XmppFeatureNegotiatorBase with InBand
       return _currentCompleter.future;
     }
     if (!attemptRegistration) return const Result(NegotiatorState.done);
-    if (!_matched) return const Result(InBandRegistrationSkippedError());
+    if (!_matched && attributes.getSocket().isSecure()) {
+      _logger.severe('In-band registration was requested, but is not supported by the server!');
+      return const Result(InBandRegistrationSkippedError());
+    } else if (!_matched && !_waitingForSecure) {
+      // If we are not matched, we can't register
+      _logger.warning('The server is not secure and does not claim support for in-band registration. Waiting for server to become secure, then trying again.');
+      _waitingForSecure = true;
+      return const Result(NegotiatorState.retryLater);
+    } else if (!_matched) {
+      _logger.severe('Server insecure and does not support in-band registration, cannot register.');
+      return const Result(InBandRegistrationSkippedError());
+    }
     assert(_formHandlers.containsKey(InBandRegistrationDataForm), 'InBandRegistrationNegotiator must have a form handler for InBandRegistrationDataForm to work properly. '
         'You will not be able to register to many servers without it. '
         'If you did not intend to register, set attemptRegistration to false.');
