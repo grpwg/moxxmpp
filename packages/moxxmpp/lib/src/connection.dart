@@ -514,6 +514,7 @@ class XmppConnection {
         encrypted: details.encrypted,
         shouldEncrypt: details.shouldEncrypt,
         forceEncryption: details.forceEncryption,
+        omemoRecipientJids: details.omemoRecipientJids,
       ),
     );
     _log.fine('Done');

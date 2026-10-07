@@ -412,6 +412,7 @@ class MUCManager extends XmppManagerBase {
               item.attributes['affiliation']! as String,
             ),
             role,
+            realJid: _realJidOf(item),
           );
 
           // Remove the old member.
@@ -436,6 +437,7 @@ class MUCManager extends XmppManagerBase {
             item.attributes['affiliation']! as String,
           ),
           role,
+          realJid: _realJidOf(item),
         );
         logger.finest('Got presence from ${from.resource} in $bareFrom');
         if (room.joined) {
@@ -558,5 +560,16 @@ class MUCManager extends XmppManagerBase {
 
       return state;
     });
+  }
+}
+
+/// Real bare JID from a MUC `<item jid='…'/>`, or null when withheld.
+JID? _realJidOf(XMLNode item) {
+  final raw = item.attributes['jid'];
+  if (raw is! String || raw.isEmpty) return null;
+  try {
+    return JID.fromString(raw).toBare();
+  } catch (_) {
+    return null;
   }
 }

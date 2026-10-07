@@ -13,6 +13,7 @@ class StanzaDetails {
     this.shouldEncrypt = true,
     this.encrypted = false,
     this.forceEncryption = false,
+    this.omemoRecipientJids,
     this.bypassQueue = false,
     this.responseBypassesQueue = true,
     this.postSendExtensions,
@@ -40,6 +41,10 @@ class StanzaDetails {
   /// Tells an E2EE implementation, if available, to encrypt the stanza (true) or
   /// ignore the stanza (false).
   final bool shouldEncrypt;
+
+  /// When set, OMEMO encrypts to these bare JIDs instead of `stanza.to`
+  /// (Conversations MUC: keys for every member's real JID, `to` is the room).
+  final List<String>? omemoRecipientJids;
 
   /// Bypasses being put into the queue. Useful for sending stanzas that must go out
   /// now, where it's okay if it does not get sent.

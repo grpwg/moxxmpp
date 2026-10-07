@@ -111,7 +111,7 @@ typedef PendingMessage = (String, String?);
 
 /// An entity inside a MUC room. The name "member" here does not refer to an affiliation of member.
 class RoomMember {
-  const RoomMember(this.nick, this.affiliation, this.role);
+  const RoomMember(this.nick, this.affiliation, this.role, {this.realJid});
 
   /// The entity's nickname.
   final String nick;
@@ -122,15 +122,23 @@ class RoomMember {
   /// The assigned role.
   final Role role;
 
+  /// Real bare JID from `<item jid='…'/>`, when the room is non-anonymous.
+  ///
+  /// Null in anonymous rooms — OMEMO cannot address such an occupant
+  /// (Conversations drops encrypted MUC traffic without a real JID).
+  final JID? realJid;
+
   RoomMember copyWith({
     String? nick,
     Affiliation? affiliation,
     Role? role,
+    JID? realJid,
   }) {
     return RoomMember(
       nick ?? this.nick,
       affiliation ?? this.affiliation,
       role ?? this.role,
+      realJid: realJid ?? this.realJid,
     );
   }
 }

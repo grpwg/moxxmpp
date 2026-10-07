@@ -16,6 +16,7 @@ import 'package:moxxmpp/src/xeps/xep_0030/types.dart';
 import 'package:moxxmpp/src/xeps/xep_0030/xep_0030.dart';
 import 'package:moxxmpp/src/xeps/xep_0060/errors.dart';
 import 'package:moxxmpp/src/xeps/xep_0060/xep_0060.dart';
+import 'package:moxxmpp/src/xeps/xep_0045/xep_0045.dart';
 import 'package:moxxmpp/src/xeps/xep_0280.dart';
 import 'package:moxxmpp/src/xeps/xep_0334.dart';
 import 'package:moxxmpp/src/xeps/xep_0380.dart';
@@ -307,10 +308,19 @@ class OmemoManager extends XmppManagerBase {
             ?.isEnabled ??
         false;
     final om = await _getOmemoManager();
-    final encryptToJids = [
-      toJid.toString(),
-      if (carbonsEnabled) getAttributes().getFullJID().toBare().toString(),
-    ];
+    final ownBare = getAttributes().getFullJID().toBare().toString();
+    // MUC (Conversations): keys for every member real JID; stanza.to is the
+    // room and must not be treated as an OMEMO peer.
+    final override = state.omemoRecipientJids;
+    final encryptToJids = override != null && override.isNotEmpty
+        ? <String>{
+            ...override,
+            ownBare,
+          }.toList()
+        : [
+            toJid.toString(),
+            if (carbonsEnabled) ownBare,
+          ];
     final plaintext = bodyText != null ? utf8.encode(bodyText) : null;
     final result = await om.onOutgoingStanza(
       axolotl.AxolotlOutgoingStanza(
@@ -321,7 +331,11 @@ class OmemoManager extends XmppManagerBase {
     logger.finest('Axolotl encryption done');
 
     if (!result.canSend) {
-      final ownErrors = result.deviceEncryptionErrors[toJid.toString()];
+      // Prefer an error against the primary peer; for MUC any recipient error.
+      final ownErrors = result.deviceEncryptionErrors[toJid.toString()] ??
+          (override != null && override.isNotEmpty
+              ? result.deviceEncryptionErrors[override.first]
+              : null);
       return state
         ..cancel = true
         ..cancelReason = ownErrors != null &&
@@ -360,7 +374,30 @@ class OmemoManager extends XmppManagerBase {
     if (stanza.from == null) return state;
 
     final encrypted = stanza.firstTag('encrypted', xmlns: emeOmemo)!;
-    final fromJid = JID.fromString(stanza.from!).toBare();
+    final fromFull = JID.fromString(stanza.from!);
+    // Conversations MessageParser: groupchat OMEMO uses the occupant's real
+    // JID as the ratchet peer, never the bare room address. Anonymous rooms
+    // have no real JID → drop (cannot open).
+    String bareSender;
+    if (stanza.type == 'groupchat') {
+      final muc = getAttributes().getManagerById<MUCManager>(mucManager);
+      final nick = fromFull.resource;
+      final room = await muc?.getRoomState(fromFull.toBare());
+      final real = (nick.isEmpty ? null : room?.members[nick]?.realJid)
+          ?.toBare();
+      if (real == null) {
+        logger.finest(
+          'OMEMO groupchat from anonymous occupant ${stanza.from}; '
+          'cannot decrypt',
+        );
+        return state
+          ..encrypted = true
+          ..encryptionError = UnknownOmemoError();
+      }
+      bareSender = real.toString();
+    } else {
+      bareSender = fromFull.toBare().toString();
+    }
     final header = encrypted.firstTag('header')!;
     final ourId = await _getDeviceId();
 
@@ -395,7 +432,7 @@ class OmemoManager extends XmppManagerBase {
     final om = await _getOmemoManager();
     final result = await om.onIncomingStanza(
       axolotl.AxolotlIncomingStanza(
-        bareSenderJid: fromJid.toString(),
+        bareSenderJid: bareSender,
         senderDeviceId: sid,
         keys: keys,
         iv: iv,

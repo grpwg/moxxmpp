@@ -14,6 +14,7 @@ class StanzaHandlerData {
     this.encrypted = false,
     this.forceEncryption = false,
     this.shouldEncrypt = true,
+    this.omemoRecipientJids,
     this.skip = false,
   });
 
@@ -53,6 +54,9 @@ class StanzaHandlerData {
   /// Flag indicating whether a E2EE implementation should encrypt the stanza (true)
   /// or not (false).
   bool shouldEncrypt;
+
+  /// Override OMEMO recipient list (MUC member real JIDs). See [StanzaDetails].
+  List<String>? omemoRecipientJids;
 
   /// Additional data from other managers.
   final TypedMap<StanzaHandlerExtension> extensions;
