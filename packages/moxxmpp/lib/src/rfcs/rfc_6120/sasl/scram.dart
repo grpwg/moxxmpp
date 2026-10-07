@@ -246,6 +246,9 @@ class SaslScramNegotiator extends Sasl2AuthenticationNegotiator {
   bool _checkSignature(String base64Signature) {
     final signature =
         parseKeyValue(utf8.decode(base64.decode(base64Signature)));
+    _log.finest(
+      'Expecting signature: "$_serverSignature", got: "${signature["v"]}"',
+    );
     return signature['v']! == _serverSignature;
   }
 
@@ -360,6 +363,11 @@ class SaslScramNegotiator extends Sasl2AuthenticationNegotiator {
 
   @override
   Future<Result<bool, NegotiatorError>> onSasl2Success(XMLNode response) async {
+    // Don't do anything if we have not been picked for SASL2.
+    if (!pickedForSasl2) {
+      return const Result(true);
+    }
+
     // When we're done with SASL2, check the additional data to verify the server
     // signature.
     state = NegotiatorState.done;

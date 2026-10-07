@@ -12,12 +12,6 @@ import 'package:moxxmpp/src/xeps/xep_0203.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:uuid/uuid.dart';
 
-/// Logical XOR between [a] and [b].
-// TODO(Unknown): Move to moxlib?
-bool _xor(bool a, bool b) {
-  return !a && b || a && !b;
-}
-
 abstract class MAMError {}
 
 class UnknownMAMError extends MAMError {}
@@ -25,11 +19,38 @@ class UnknownMAMError extends MAMError {}
 /// (The JID we sent the query to, the ID we used).
 typedef PendingQueryKey = (JID, String);
 
+/// One page of a MAM query, including the RSM cursor from `<fin/>`.
+class MamQueryResult {
+  const MamQueryResult({
+    required this.count,
+    required this.complete,
+    this.first,
+    this.last,
+  });
+
+  /// Number of `<result/>` messages received for this page.
+  final int count;
+
+  /// True when the archive has no further matching results after this page.
+  final bool complete;
+
+  /// RSM `<first/>` id from `<fin/>`, if present.
+  final String? first;
+
+  /// RSM `<last/>` id from `<fin/>`, if present. Use as `rsmAfter` for the
+  /// next catch-up page.
+  final String? last;
+}
+
 class MAMData extends StanzaHandlerExtension {
-  MAMData(this.queryId, this.delay);
+  MAMData(this.queryId, this.delay, {this.archiveId});
 
   /// The id of the query.
   final String? queryId;
+
+  /// The MAM result's stable archive id (`<result id='…'/>`). This is the
+  /// value RSM `after`/`before` expect for catch-up paging.
+  final String? archiveId;
 
   /// The MAM-attached delayed delivery tag.
   final DelayedDeliveryData delay;
@@ -68,6 +89,7 @@ class MessageArchiveManagementManager extends XmppManagerBase {
 
     final result = stanza.firstTag('result', xmlns: mamXmlns)!;
     final qid = result.attributes['queryid']! as String;
+    final archiveId = result.attributes['id'] as String?;
     final jid = JID.fromString(stanza.from!);
     final key = (jid, qid);
     final isQuerying = await _lock.synchronized(() {
@@ -99,6 +121,7 @@ class MessageArchiveManagementManager extends XmppManagerBase {
               jid,
               DateTime.parse(delay.attributes['stamp']! as String),
             ),
+            archiveId: archiveId,
           ),
         ),
     );
@@ -106,32 +129,33 @@ class MessageArchiveManagementManager extends XmppManagerBase {
 
   /// Query the MAM archive located at [archive].
   ///
-  /// If [beforeId] is specified, then the
-  /// query will try to query only messages that were sent before the stanza with id [beforeId].
-  /// [afterId] works similary, but for specifies a lower (time) bound. Note that the archive
-  /// must support "urn:xmpp:mam:2#extended", which this method does not check for. Cannot be specified
-  /// with [ids].
+  /// Prefer querying the user's own bare JID (account archive). Filter a
+  /// single conversation with [withJid]; page catch-up with [rsmAfter] (classic
+  /// RSM, Conversations-style) and older history with [rsmBefore].
   ///
-  /// If [ids] is specified, then query only for those message ids. Cannot be specified with either [beforeId]
-  /// or [afterId].
+  /// [beforeId]/[afterId]/[ids] are the optional `urn:xmpp:mam:2#extended`
+  /// form fields. They require server support for that feature.
   ///
-  /// If [pageSize] is specified, then the archive will return, at most, [pageSize] messages.
-  ///
-  /// Returns either a [MAMError], in case the request was unsuccessful, or the number of message
-  /// stanzas we received from the query.
-  Future<Result<MAMError, int>> requestMessages(
+  /// Returns either a [MAMError] or a [MamQueryResult] describing the page.
+  Future<Result<MAMError, MamQueryResult>> requestMessages(
     JID archive, {
+    JID? withJid,
+    DateTime? start,
+    DateTime? end,
+    String? rsmAfter,
+    String? rsmBefore,
     String? beforeId,
     String? afterId,
     List<String>? ids,
     int? pageSize,
   }) async {
     assert(
-      _xor(
-        beforeId != null || afterId != null,
-        ids != null,
-      ),
+      !(ids != null && (beforeId != null || afterId != null)),
       'beforeId/afterId cannot be specified with ids',
+    );
+    assert(
+      !(rsmAfter != null && rsmBefore != null),
+      'rsmAfter and rsmBefore cannot both be specified',
     );
 
     final uuid = const Uuid().v4();
@@ -139,45 +163,88 @@ class MessageArchiveManagementManager extends XmppManagerBase {
     await _lock.synchronized(() {
       _pendingQueries[key] = 0;
     });
-    DataForm? dataForm;
-    if (beforeId != null || afterId != null || ids != null) {
-      dataForm = DataForm(
-        type: 'submit',
-        instructions: [],
-        fields: [
-          const DataFormField(
-            varAttr: 'FORM_TYPE',
-            type: 'hidden',
-            options: [],
-            values: [mamXmlns],
-            isRequired: false,
-          ),
-          if (beforeId != null)
-            DataFormField(
-              varAttr: 'before-id',
-              options: [],
-              values: [beforeId],
-              isRequired: false,
-            ),
-          if (afterId != null)
-            DataFormField(
-              varAttr: 'after-id',
-              options: [],
-              values: [afterId],
-              isRequired: false,
-            ),
-          if (ids != null)
-            DataFormField(
-              varAttr: 'ids',
-              options: [],
-              values: ids,
-              isRequired: false,
-            ),
-        ],
-        reported: [],
-        items: [],
-      );
-    }
+
+    final formFields = <DataFormField>[
+      const DataFormField(
+        varAttr: 'FORM_TYPE',
+        type: 'hidden',
+        options: [],
+        values: [mamXmlns],
+        isRequired: false,
+      ),
+      if (withJid != null)
+        DataFormField(
+          varAttr: 'with',
+          options: [],
+          values: [withJid.toBare().toString()],
+          isRequired: false,
+        ),
+      if (start != null)
+        DataFormField(
+          varAttr: 'start',
+          options: [],
+          values: [start.toUtc().toIso8601String()],
+          isRequired: false,
+        ),
+      if (end != null)
+        DataFormField(
+          varAttr: 'end',
+          options: [],
+          values: [end.toUtc().toIso8601String()],
+          isRequired: false,
+        ),
+      if (beforeId != null)
+        DataFormField(
+          varAttr: 'before-id',
+          options: [],
+          values: [beforeId],
+          isRequired: false,
+        ),
+      if (afterId != null)
+        DataFormField(
+          varAttr: 'after-id',
+          options: [],
+          values: [afterId],
+          isRequired: false,
+        ),
+      if (ids != null)
+        DataFormField(
+          varAttr: 'ids',
+          options: [],
+          values: ids,
+          isRequired: false,
+        ),
+    ];
+
+    // Always submit a form when filtering; a bare max-only query is still
+    // valid and returns the most recent page of the account archive.
+    final dataForm = formFields.length > 1
+        ? DataForm(
+            type: 'submit',
+            instructions: [],
+            fields: formFields,
+            reported: [],
+            items: [],
+          )
+        : null;
+
+    final rsmChildren = <XMLNode>[
+      if (pageSize != null)
+        XMLNode(
+          tag: 'max',
+          text: pageSize.toString(),
+        ),
+      if (rsmAfter != null)
+        XMLNode(
+          tag: 'after',
+          text: rsmAfter,
+        ),
+      if (rsmBefore != null)
+        XMLNode(
+          tag: 'before',
+          text: rsmBefore,
+        ),
+    ];
 
     final request = Stanza.iq(
       type: 'set',
@@ -190,18 +257,13 @@ class MessageArchiveManagementManager extends XmppManagerBase {
             'queryid': uuid,
           },
           children: [
-            if (pageSize != null)
+            if (dataForm != null) dataForm.toXml(),
+            if (rsmChildren.isNotEmpty)
               XMLNode.xmlns(
                 tag: 'set',
                 xmlns: rsmXmlns,
-                children: [
-                  XMLNode(
-                    tag: 'max',
-                    text: pageSize.toString(),
-                  ),
-                ],
+                children: rsmChildren,
               ),
-            if (dataForm != null) dataForm.toXml(),
           ],
         ),
       ],
@@ -215,12 +277,27 @@ class MessageArchiveManagementManager extends XmppManagerBase {
 
     // Remove the pending query key.
     final messageCount =
-        await _lock.synchronized(() => _pendingQueries.remove(key));
+        await _lock.synchronized(() => _pendingQueries.remove(key)) ?? 0;
 
     // Check if the query finished successfully
-    if (result!.attributes['type'] != 'result') {
+    if (result == null || result.attributes['type'] != 'result') {
       return Result(UnknownMAMError());
     }
-    return Result(messageCount);
+
+    final fin = result.firstTag('fin', xmlns: mamXmlns);
+    final complete = fin?.attributes['complete'] == 'true' ||
+        // Some servers omit complete when the page is the last one and
+        // returned fewer than max; treat an empty page as done.
+        messageCount == 0;
+    final set = fin?.firstTag('set', xmlns: rsmXmlns);
+    return Result(
+      MamQueryResult(
+        count: messageCount,
+        complete: complete ||
+            (pageSize != null && messageCount < pageSize),
+        first: set?.firstTag('first')?.innerText(),
+        last: set?.firstTag('last')?.innerText(),
+      ),
+    );
   }
 }

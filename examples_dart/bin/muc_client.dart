@@ -29,7 +29,7 @@ void main(List<String> args) async {
     TestingReconnectionPolicy(),
     AlwaysConnectedConnectivityManager(),
     ClientToServerNegotiator(),
-    ExampleTCPSocketWrapper(parser.srvRecord, false),
+    ExampleTCPSocketWrapper(parser.srvRecord),
   )..connectionSettings = parser.connectionSettings;
 
   // Register the managers and negotiators

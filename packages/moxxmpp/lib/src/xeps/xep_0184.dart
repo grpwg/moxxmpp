@@ -107,12 +107,17 @@ class MessageDeliveryReceiptManager extends XmppManagerBase {
   List<XMLNode> _messageSendingCallback(
     TypedMap<StanzaHandlerExtension> extensions,
   ) {
-    final data = extensions.get<MessageDeliveryReceivedData>();
-    return data != null
-        ? [
-            data.toXML(),
-          ]
-        : [];
+    final nodes = <XMLNode>[];
+    final received = extensions.get<MessageDeliveryReceivedData>();
+    if (received != null) {
+      nodes.add(received.toXML());
+    }
+    // Outgoing `<request/>` (Conversations MessageGenerator.preparePacket).
+    final request = extensions.get<MessageDeliveryReceiptData>();
+    if (request != null && request.receiptRequested) {
+      nodes.add(request.toXML());
+    }
+    return nodes;
   }
 
   @override
