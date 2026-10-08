@@ -6,6 +6,14 @@ const bindXmlns = 'urn:ietf:params:xml:ns:xmpp-bind';
 const startTlsXmlns = 'urn:ietf:params:xml:ns:xmpp-tls';
 const fullStanzaXmlns = 'urn:ietf:params:xml:ns:xmpp-stanzas';
 
+// RFC 7395 (XMPP over WebSocket framing)
+const xmppFramingXmlns = 'urn:ietf:params:xml:ns:xmpp-framing';
+
+// XEP-0156 (Discovering Alternative XMPP Connection Methods)
+const hostMetaXrdXmlns = 'http://docs.oasis-open.org/ns/xri/xrd-1.0';
+const websocketAltConnectionsXmlns = 'urn:xmpp:alt-connections:websocket';
+const boshAltConnectionsXmlns = 'urn:xmpp:alt-connections:xbosh';
+
 // RFC 6121
 const rosterXmlns = 'jabber:iq:roster';
 const rosterVersioningXmlns = 'urn:xmpp:features:rosterver';

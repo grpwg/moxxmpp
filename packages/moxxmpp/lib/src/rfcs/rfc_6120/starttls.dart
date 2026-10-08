@@ -10,6 +10,9 @@ enum _StartTlsState { ready, requested }
 class StartTLSFailedError extends NegotiatorError {
   @override
   bool isRecoverable() => true;
+
+  @override
+  String toString() => 'StartTLS failed';
 }
 
 class StartTLSNonza extends XMLNode {
@@ -29,6 +32,13 @@ class StartTlsNegotiator extends XmppFeatureNegotiatorBase {
 
   /// Logger.
   final Logger _log = Logger('StartTlsNegotiator');
+
+  @override
+  bool matchesFeature(List<XMLNode> features) {
+    // RFC 7395 / WSS already provides TLS at the transport layer.
+    if (attributes.getSocket().isSecure()) return false;
+    return super.matchesFeature(features);
+  }
 
   @override
   Future<Result<NegotiatorState, NegotiatorError>> negotiate(
