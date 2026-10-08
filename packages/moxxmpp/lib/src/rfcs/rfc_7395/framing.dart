@@ -54,7 +54,8 @@ String? websocketFrameToStream(String raw, {String? defaultFrom}) {
 String? framingSeeOtherUri(String raw) => _attr(raw.trim(), 'see-other-uri');
 
 bool _isFramingOpen(String s) =>
-    s.contains(xmppFramingXmlns) && (s.contains('<open') || s.contains(':open'));
+    s.contains(xmppFramingXmlns) &&
+    (s.contains('<open') || s.contains(':open'));
 
 bool _isFramingClose(String s) =>
     s.contains(xmppFramingXmlns) &&

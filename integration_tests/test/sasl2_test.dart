@@ -21,57 +21,61 @@ void main() {
     );
   });
 
-  test('Test authenticating against Prosody with SASL2, Bind2, and FAST',
-      () async {
-    final conn = XmppConnection(
-      TestingReconnectionPolicy(),
-      AlwaysConnectedConnectivityManager(),
-      ClientToServerNegotiator(),
-      TestingTCPSocketWrapper(),
-    )..connectionSettings = ConnectionSettings(
-        jid: JID.fromString('testuser1@localhost'),
-        password: 'abc123',
-        host: '127.0.0.1',
-        port: 5222,
-      );
-    final csi = CSIManager();
-    await csi.setInactive(sendNonza: false);
-    await conn.registerManagers([
-      RosterManager(TestingRosterStateManager('', [])),
-      DiscoManager([]),
-    ]);
-    await conn.registerFeatureNegotiators([
-      SaslPlainNegotiator(),
-      SaslScramNegotiator(9, '', '', ScramHashType.sha1),
-      SaslScramNegotiator(10, '', '', ScramHashType.sha256),
-      ResourceBindingNegotiator(),
-      FASTSaslNegotiator(),
-      Bind2Negotiator(),
-      StartTlsNegotiator(),
-      Sasl2Negotiator()
-        ..userAgent = const UserAgent(
-          id: 'd4565fa7-4d72-4749-b3d3-740edbf87770',
-          software: 'moxxmpp',
-          device: "PapaTutuWawa's awesome device",
-        ),
-    ]);
+  test(
+    'Test authenticating against Prosody with SASL2, Bind2, and FAST',
+    () async {
+      final conn =
+          XmppConnection(
+              TestingReconnectionPolicy(),
+              AlwaysConnectedConnectivityManager(),
+              ClientToServerNegotiator(),
+              TestingTCPSocketWrapper(),
+            )
+            ..connectionSettings = ConnectionSettings(
+              jid: JID.fromString('testuser1@localhost'),
+              password: 'abc123',
+              host: '127.0.0.1',
+              port: 5222,
+            );
+      final csi = CSIManager();
+      await csi.setInactive(sendNonza: false);
+      await conn.registerManagers([
+        RosterManager(TestingRosterStateManager('', [])),
+        DiscoManager([]),
+      ]);
+      await conn.registerFeatureNegotiators([
+        SaslPlainNegotiator(),
+        SaslScramNegotiator(9, '', '', ScramHashType.sha1),
+        SaslScramNegotiator(10, '', '', ScramHashType.sha256),
+        ResourceBindingNegotiator(),
+        FASTSaslNegotiator(),
+        Bind2Negotiator(),
+        StartTlsNegotiator(),
+        Sasl2Negotiator()
+          ..userAgent = const UserAgent(
+            id: 'd4565fa7-4d72-4749-b3d3-740edbf87770',
+            software: 'moxxmpp',
+            device: "PapaTutuWawa's awesome device",
+          ),
+      ]);
 
-    final result = await conn.connect(
-      waitUntilLogin: true,
-      shouldReconnect: false,
-      enableReconnectOnSuccess: false,
-    );
-    expect(result.isType<bool>(), true);
-    expect(
-      conn.getNegotiatorById<Sasl2Negotiator>(sasl2Negotiator)!.state,
-      NegotiatorState.done,
-    );
-    expect(
-      conn
-              .getNegotiatorById<FASTSaslNegotiator>(saslFASTNegotiator)!
-              .fastToken !=
-          null,
-      true,
-    );
-  });
+      final result = await conn.connect(
+        waitUntilLogin: true,
+        shouldReconnect: false,
+        enableReconnectOnSuccess: false,
+      );
+      expect(result.isType<bool>(), true);
+      expect(
+        conn.getNegotiatorById<Sasl2Negotiator>(sasl2Negotiator)!.state,
+        NegotiatorState.done,
+      );
+      expect(
+        conn
+                .getNegotiatorById<FASTSaslNegotiator>(saslFASTNegotiator)!
+                .fastToken !=
+            null,
+        true,
+      );
+    },
+  );
 }

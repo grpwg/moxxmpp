@@ -329,8 +329,8 @@ class RosterManager extends XmppManagerBase {
     // The negotiator is optional: a caller may simply not have registered
     // it. Treating that as "not supported" is correct, and far better than
     // throwing a null-check error out of requestRoster().
-    final negotiator =
-        getAttributes().getNegotiatorById<RosterFeatureNegotiator>(rosterNegotiator);
+    final negotiator = getAttributes()
+        .getNegotiatorById<RosterFeatureNegotiator>(rosterNegotiator);
     return negotiator?.isSupported ?? false;
   }
 

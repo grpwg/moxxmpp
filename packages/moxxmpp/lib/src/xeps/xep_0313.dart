@@ -293,8 +293,7 @@ class MessageArchiveManagementManager extends XmppManagerBase {
     return Result(
       MamQueryResult(
         count: messageCount,
-        complete: complete ||
-            (pageSize != null && messageCount < pageSize),
+        complete: complete || (pageSize != null && messageCount < pageSize),
         first: set?.firstTag('first')?.innerText(),
         last: set?.firstTag('last')?.innerText(),
       ),

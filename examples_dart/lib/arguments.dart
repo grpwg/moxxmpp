@@ -14,18 +14,22 @@ class ArgumentParser {
     parser
       ..addOption('jid', help: 'The JID to connect as')
       ..addOption('password', help: 'The password to use for authenticating')
-      ..addOption('host',
-          help:
-              'The host address to connect to (By default uses the domain part of the JID)')
+      ..addOption(
+        'host',
+        help: 'The host address to connect to (By default uses the domain part of the JID)',
+      )
       ..addOption('port', help: 'The port to connect to')
-      ..addOption('xmpps-srv',
-          help:
-              'Inject a SRV record for _xmpps-client._tcp. Format: <priority>,<weight>,<target>,<port>')
-      ..addFlag('help',
-          abbr: 'h',
-          negatable: false,
-          defaultsTo: false,
-          help: 'Show this help text');
+      ..addOption(
+        'xmpps-srv',
+        help: 'Inject a SRV record for _xmpps-client._tcp. Format: <priority>,<weight>,<target>,<port>',
+      )
+      ..addFlag(
+        'help',
+        abbr: 'h',
+        negatable: false,
+        defaultsTo: false,
+        help: 'Show this help text',
+      );
   }
 
   /// The [ArgParser] that handles parsing the arguments.
@@ -61,11 +65,11 @@ class ArgumentParser {
 
   /// Construct connection settings from the parsed options.
   ConnectionSettings get connectionSettings => ConnectionSettings(
-        jid: jid,
-        password: options['password']!,
-        host: options['host'],
-        port: (options['port'] as String?)?.toInt(),
-      );
+    jid: jid,
+    password: options['password']!,
+    host: options['host'],
+    port: (options['port'] as String?)?.toInt(),
+  );
 
   /// Construct an xmpps-client SRV record for injection, if specified.
   MoxSrvRecord? get srvRecord {

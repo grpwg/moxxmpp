@@ -78,9 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
         StreamManagementManager(),
         DiscoManager([]),
         RosterManager(TestingRosterStateManager("", [])),
-        PingManager(
-          const Duration(minutes: 3),
-        ),
+        PingManager(const Duration(minutes: 3)),
         MessageManager(),
         PresenceManager(),
       ])
@@ -146,16 +144,12 @@ class _MyHomePageState extends State<MyHomePage> {
             TextField(
               enabled: !loading,
               controller: jidController,
-              decoration: const InputDecoration(
-                labelText: 'JID',
-              ),
+              decoration: const InputDecoration(labelText: 'JID'),
             ),
             TextField(
               enabled: !loading,
               controller: passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-              ),
+              decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
           ],

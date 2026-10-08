@@ -19,13 +19,13 @@ class EchoMessageManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'message',
-          callback: _onMessage,
-          priority: -100,
-          xmlns: null,
-        )
-      ];
+    StanzaHandler(
+      stanzaTag: 'message',
+      callback: _onMessage,
+      priority: -100,
+      xmlns: null,
+    ),
+  ];
 
   Future<StanzaHandlerData> _onMessage(
     Stanza stanza,
@@ -64,20 +64,20 @@ void main(List<String> arguments) async {
     );
   });
 
-  final conn = XmppConnection(
-    TestingReconnectionPolicy(),
-    AlwaysConnectedConnectivityManager(),
-    ComponentToServerNegotiator(),
-    TestingTCPSocketWrapper(),
-  )..connectionSettings = ConnectionSettings(
-      jid: JID.fromString('component.localhost'),
-      password: 'abc123',
-      host: '127.0.0.1',
-      port: 8888,
-    );
-  await conn.registerManagers([
-    EchoMessageManager(),
-  ]);
+  final conn =
+      XmppConnection(
+          TestingReconnectionPolicy(),
+          AlwaysConnectedConnectivityManager(),
+          ComponentToServerNegotiator(),
+          TestingTCPSocketWrapper(),
+        )
+        ..connectionSettings = ConnectionSettings(
+          jid: JID.fromString('component.localhost'),
+          password: 'abc123',
+          host: '127.0.0.1',
+          port: 8888,
+        );
+  await conn.registerManagers([EchoMessageManager()]);
 
   final result = await conn.connect(
     waitUntilLogin: true,

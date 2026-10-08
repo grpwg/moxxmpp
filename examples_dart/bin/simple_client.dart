@@ -24,38 +24,40 @@ void main(List<String> args) async {
   });
 
   // This class manages every aspect of handling the XMPP stream.
-  final connection = XmppConnection(
-    // A reconnection policy tells the connection how to handle an error
-    // while or after connecting to the server. The [TestingReconnectionPolicy]
-    // immediately triggers a reconnection. In a real implementation, one might
-    // prefer to use a smarter strategy, like using an exponential backoff.
-    TestingReconnectionPolicy(),
+  final connection =
+      XmppConnection(
+          // A reconnection policy tells the connection how to handle an error
+          // while or after connecting to the server. The [TestingReconnectionPolicy]
+          // immediately triggers a reconnection. In a real implementation, one might
+          // prefer to use a smarter strategy, like using an exponential backoff.
+          TestingReconnectionPolicy(),
 
-    // A connectivity manager tells the connection when it can connect. This is to
-    // ensure that we're not constantly trying to reconnect because we have no
-    // Internet connection. [AlwaysConnectedConnectivityManager] always says that
-    // we're connected. In a real application, one might prefer to use a smarter
-    // strategy, like using connectivity_plus to query the system's network connectivity
-    // state.
-    AlwaysConnectedConnectivityManager(),
+          // A connectivity manager tells the connection when it can connect. This is to
+          // ensure that we're not constantly trying to reconnect because we have no
+          // Internet connection. [AlwaysConnectedConnectivityManager] always says that
+          // we're connected. In a real application, one might prefer to use a smarter
+          // strategy, like using connectivity_plus to query the system's network connectivity
+          // state.
+          AlwaysConnectedConnectivityManager(),
 
-    // This kind of negotiator tells the connection how to handle the stream
-    // negotiations. The [ClientToServerNegotiator] allows to connect to the server
-    // as a regular client. Another negotiator would be the [ComponentToServerNegotiator] that
-    // allows for connections to the server where we're acting as a component.
-    ClientToServerNegotiator(),
+          // This kind of negotiator tells the connection how to handle the stream
+          // negotiations. The [ClientToServerNegotiator] allows to connect to the server
+          // as a regular client. Another negotiator would be the [ComponentToServerNegotiator] that
+          // allows for connections to the server where we're acting as a component.
+          ClientToServerNegotiator(),
 
-    // A wrapper around any kind of connection. In this case, we use the [TCPSocketWrapper], which
-    // uses a dart:io Socket/SecureSocket to connect to the server. If you want, you can also
-    // provide your own socket to use, for example, WebSockets or any other connection
-    // mechanism.
-    TCPSocketWrapper(false),
-  )..connectionSettings = ConnectionSettings(
-      jid: xmppUser,
-      password: xmppPass,
-      host: xmppHost,
-      port: xmppPort,
-    );
+          // A wrapper around any kind of connection. In this case, we use the [TCPSocketWrapper], which
+          // uses a dart:io Socket/SecureSocket to connect to the server. If you want, you can also
+          // provide your own socket to use, for example, WebSockets or any other connection
+          // mechanism.
+          TCPSocketWrapper(false),
+        )
+        ..connectionSettings = ConnectionSettings(
+          jid: xmppUser,
+          password: xmppPass,
+          host: xmppHost,
+          port: xmppPort,
+        );
 
   // Register a set of "managers" that provide you with implementations of various
   // XEPs. Some have interdependencies, which need to be met. However, this example keeps

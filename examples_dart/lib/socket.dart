@@ -15,8 +15,6 @@ class ExampleTCPSocketWrapper extends TCPSocketWrapper {
 
   @override
   Future<List<MoxSrvRecord>> srvQuery(String domain, bool dnssec) async {
-    return [
-      if (srvRecord != null) srvRecord!,
-    ];
+    return [if (srvRecord != null) srvRecord!];
   }
 }

@@ -50,8 +50,10 @@ void main(List<String> args) async {
 
   // Connect
   Logger.root.info('Connecting...');
-  final result =
-      await connection.connect(shouldReconnect: false, waitUntilLogin: true);
+  final result = await connection.connect(
+    shouldReconnect: false,
+    waitUntilLogin: true,
+  );
   if (!result.isType<bool>()) {
     Logger.root.severe('Authentication failed!');
     return;
@@ -59,28 +61,23 @@ void main(List<String> args) async {
   Logger.root.info('Connected.');
 
   // Print received messages.
-  connection
-      .asBroadcastStream()
-      .where((event) => event is MessageEvent)
-      .listen((event) {
-    event as MessageEvent;
+  connection.asBroadcastStream().where((event) => event is MessageEvent).listen(
+    (event) {
+      event as MessageEvent;
 
-    // Ignore messages with no <body />
-    final body = event.get<MessageBodyData>()?.body;
-    if (body == null) {
-      return;
-    }
+      // Ignore messages with no <body />
+      final body = event.get<MessageBodyData>()?.body;
+      if (body == null) {
+        return;
+      }
 
-    print('=====> [${event.from}] $body');
-  });
+      print('=====> [${event.from}] $body');
+    },
+  );
 
   // Join room
   final mm = connection.getManagerById<MUCManager>(mucManager)!;
-  await mm.joinRoom(
-    muc,
-    nick,
-    maxHistoryStanzas: 0,
-  );
+  await mm.joinRoom(muc, nick, maxHistoryStanzas: 0);
   final state = (await mm.getRoomState(muc))!;
 
   print('=====> ${state.members.length} users in room');
@@ -91,16 +88,17 @@ void main(List<String> args) async {
     await connection
         .getManagerById<MessageManager>(messageManager)!
         .sendMessage(
-            muc,
-            TypedMap<StanzaHandlerExtension>.fromList([
-              MessageBodyData(line),
-              StableIdData(
-                // NOTE: Don't do this. Use a UUID.
-                DateTime.now().millisecondsSinceEpoch.toString(),
-                null,
-              ),
-            ]),
-            type: 'groupchat');
+          muc,
+          TypedMap<StanzaHandlerExtension>.fromList([
+            MessageBodyData(line),
+            StableIdData(
+              // NOTE: Don't do this. Use a UUID.
+              DateTime.now().millisecondsSinceEpoch.toString(),
+              null,
+            ),
+          ]),
+          type: 'groupchat',
+        );
   }
 
   // Leave room

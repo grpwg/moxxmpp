@@ -33,7 +33,8 @@ AxolotlBundle axolotlBundleFromXML(JID jid, int id, XMLNode bundle) {
   if (section != null) {
     for (final pk in section.children) {
       if (pk.tag != 'pk' && pk.tag != 'preKeyPublic') continue;
-      final idText = (pk.attributes['id'] ?? pk.attributes['preKeyId']) as String?;
+      final idText =
+          (pk.attributes['id'] ?? pk.attributes['preKeyId']) as String?;
       final pkId = int.tryParse(idText ?? '');
       if (pkId == null) continue;
       prekeys[pkId] = pk.innerText();

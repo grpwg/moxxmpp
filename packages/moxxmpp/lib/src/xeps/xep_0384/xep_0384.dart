@@ -27,7 +27,8 @@ import 'package:omemo_dart/omemo_dart.dart' show NoKeyMaterialAvailableError;
 import 'package:omemo_dart/omemo_dart_axolotl.dart' as axolotl;
 
 /// Acquire the axolotl (OMEMO 0.3.0 / Conversations) manager.
-typedef GetOmemoManagerCallback = Future<axolotl.AxolotlOmemoManager> Function();
+typedef GetOmemoManagerCallback = Future<axolotl.AxolotlOmemoManager>
+    Function();
 
 /// Whether a stanza should be encrypted.
 typedef ShouldEncryptStanzaCallback = Future<bool> Function(
@@ -383,8 +384,8 @@ class OmemoManager extends XmppManagerBase {
       final muc = getAttributes().getManagerById<MUCManager>(mucManager);
       final nick = fromFull.resource;
       final room = await muc?.getRoomState(fromFull.toBare());
-      final real = (nick.isEmpty ? null : room?.members[nick]?.realJid)
-          ?.toBare();
+      final real =
+          (nick.isEmpty ? null : room?.members[nick]?.realJid)?.toBare();
       if (real == null) {
         logger.finest(
           'OMEMO groupchat from anonymous occupant ${stanza.from}; '

@@ -1,6 +1,7 @@
 library moxxmpp_color;
 
 import 'dart:convert';
+
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:hsluv/extensions.dart';

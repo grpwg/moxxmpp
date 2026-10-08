@@ -81,8 +81,10 @@ void main(List<String> args) async {
 
   // Connect
   Logger.root.info('Connecting...');
-  final result =
-      await connection.connect(shouldReconnect: false, waitUntilLogin: true);
+  final result = await connection.connect(
+    shouldReconnect: false,
+    waitUntilLogin: true,
+  );
   if (!result.isType<bool>()) {
     Logger.root.severe('Authentication failed!');
     return;
@@ -95,7 +97,8 @@ void main(List<String> args) async {
   final omemoResult = await moxxmppOmemo.publishBundle(await device.toBundle());
   if (!omemoResult.isType<bool>()) {
     Logger.root.severe(
-        'Failed to publish OMEMO bundle: ${omemoResult.get<OmemoError>()}');
+      'Failed to publish OMEMO bundle: ${omemoResult.get<OmemoError>()}',
+    );
     return;
   }
 
@@ -105,9 +108,7 @@ void main(List<String> args) async {
         .getManagerById<MessageManager>(messageManager)!
         .sendMessage(
           to,
-          TypedMap<StanzaHandlerExtension>.fromList([
-            MessageBodyData(line),
-          ]),
+          TypedMap<StanzaHandlerExtension>.fromList([MessageBodyData(line)]),
         );
   }
 
