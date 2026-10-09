@@ -6,10 +6,7 @@ import 'package:moxxmpp/src/stringxml.dart';
 import 'package:synchronized/synchronized.dart';
 
 class StanzaQueueEntry {
-  const StanzaQueueEntry(
-    this.details,
-    this.completer,
-  );
+  const StanzaQueueEntry(this.details, this.completer);
 
   /// The actual data to send.
   final StanzaDetails details;
@@ -28,10 +25,7 @@ typedef CanSendCallback = Future<bool> Function();
 /// A (hopefully) async-safe queue that attempts to force
 /// in-order execution of its jobs.
 class AsyncStanzaQueue {
-  AsyncStanzaQueue(
-    this._sendStanzaFunction,
-    this._canSendCallback,
-  );
+  AsyncStanzaQueue(this._sendStanzaFunction, this._canSendCallback);
 
   /// The lock for accessing [AsyncStanzaQueue._queue].
   final Lock _lock = Lock();
@@ -53,9 +47,7 @@ class AsyncStanzaQueue {
       _queue.add(entry);
 
       if (_queue.isNotEmpty && await _canSendCallback()) {
-        unawaited(
-          _runJob(_queue.removeFirst()),
-        );
+        unawaited(_runJob(_queue.removeFirst()));
       }
     });
   }
@@ -69,9 +61,7 @@ class AsyncStanzaQueue {
 
     await _lock.synchronized(() async {
       if (_queue.isNotEmpty && await _canSendCallback()) {
-        unawaited(
-          _runJob(_queue.removeFirst()),
-        );
+        unawaited(_runJob(_queue.removeFirst()));
       }
     });
   }
@@ -81,9 +71,7 @@ class AsyncStanzaQueue {
 
     await _lock.synchronized(() {
       if (_queue.isNotEmpty) {
-        unawaited(
-          _runJob(_queue.removeFirst()),
-        );
+        unawaited(_runJob(_queue.removeFirst()));
       }
     });
   }

@@ -43,8 +43,9 @@ class Sasl2Negotiator extends XmppFeatureNegotiatorBase {
 
   /// The SASL2 <authentication /> element we received with the stream features.
   XMLNode? _sasl2Data;
-  final List<String> _activeSasl2Negotiators =
-      List<String>.empty(growable: true);
+  final List<String> _activeSasl2Negotiators = List<String>.empty(
+    growable: true,
+  );
 
   /// Register a SASL negotiator so that we can use that SASL implementation during
   /// SASL2.
@@ -77,8 +78,9 @@ class Sasl2Negotiator extends XmppFeatureNegotiatorBase {
         final mechanisms = XMLNode.xmlns(
           tag: 'mechanisms',
           xmlns: saslXmlns,
-          children:
-              _sasl2Data!.children.where((c) => c.tag == 'mechanism').toList(),
+          children: _sasl2Data!.children
+              .where((c) => c.tag == 'mechanism')
+              .toList(),
         );
         for (final negotiator in _saslNegotiators) {
           if (negotiator.matchesFeature([mechanisms])) {
@@ -111,9 +113,7 @@ class Sasl2Negotiator extends XmppFeatureNegotiatorBase {
         final authenticate = XMLNode.xmlns(
           tag: 'authenticate',
           xmlns: sasl2Xmlns,
-          attributes: {
-            'mechanism': _currentSaslNegotiator!.mechanismName,
-          },
+          attributes: {'mechanism': _currentSaslNegotiator!.mechanismName},
           children: [
             XMLNode(
               tag: 'initial-response',
@@ -130,12 +130,14 @@ class Sasl2Negotiator extends XmppFeatureNegotiatorBase {
       case Sasl2State.authenticateSent:
         if (nonza.tag == 'success') {
           // Tell the dependent negotiators about the result
-          final negotiators = _featureNegotiators
-              .where(
-                (negotiator) => _activeSasl2Negotiators.contains(negotiator.id),
-              )
-              .toList()
-            ..add(_currentSaslNegotiator!);
+          final negotiators =
+              _featureNegotiators
+                  .where(
+                    (negotiator) =>
+                        _activeSasl2Negotiators.contains(negotiator.id),
+                  )
+                  .toList()
+                ..add(_currentSaslNegotiator!);
           for (final negotiator in negotiators) {
             final result = await negotiator.onSasl2Success(nonza);
             if (!result.isType<bool>()) {
@@ -166,12 +168,14 @@ class Sasl2Negotiator extends XmppFeatureNegotiatorBase {
           );
           attributes.sendNonza(response);
         } else if (nonza.tag == 'failure') {
-          final negotiators = _featureNegotiators
-              .where(
-                (negotiator) => _activeSasl2Negotiators.contains(negotiator.id),
-              )
-              .toList()
-            ..add(_currentSaslNegotiator!);
+          final negotiators =
+              _featureNegotiators
+                  .where(
+                    (negotiator) =>
+                        _activeSasl2Negotiators.contains(negotiator.id),
+                  )
+                  .toList()
+                ..add(_currentSaslNegotiator!);
           for (final negotiator in negotiators) {
             await negotiator.onSasl2Failure(nonza);
           }
@@ -181,14 +185,10 @@ class Sasl2Negotiator extends XmppFeatureNegotiatorBase {
           if (_currentSaslNegotiator!.shouldRetrySasl()) {
             _currentSaslNegotiator!.reset();
             reset();
-            return const Result(
-              NegotiatorState.retryLater,
-            );
+            return const Result(NegotiatorState.retryLater);
           }
 
-          return Result(
-            SaslError.fromFailure(nonza),
-          );
+          return Result(SaslError.fromFailure(nonza));
         }
     }
 

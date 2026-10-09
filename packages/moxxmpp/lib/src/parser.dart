@@ -73,12 +73,12 @@ class XMPPStreamParser
   /// The selectors.
   _ChunkedConversionBuffer<List<XmlEvent>, XmlEvent> _childSelector =
       _ChunkedConversionBuffer<List<XmlEvent>, XmlEvent>(
-    XmlSubtreeSelector((event) => event.qualifiedName != 'stream:stream'),
-  );
+        XmlSubtreeSelector((event) => event.qualifiedName != 'stream:stream'),
+      );
   _ChunkedConversionBuffer<List<XmlEvent>, XmlEvent> _streamHeaderSelector =
       _ChunkedConversionBuffer<List<XmlEvent>, XmlEvent>(
-    XmlSubtreeSelector((event) => event.qualifiedName == 'stream:stream'),
-  );
+        XmlSubtreeSelector((event) => event.qualifiedName == 'stream:stream'),
+      );
 
   void reset() {
     try {
@@ -104,8 +104,9 @@ class XMPPStreamParser
     }
 
     // Recreate the buffers.
-    _eventBuffer =
-        _ChunkedConversionBuffer<String, XmlEvent>(XmlEventDecoder());
+    _eventBuffer = _ChunkedConversionBuffer<String, XmlEvent>(
+      XmlEventDecoder(),
+    );
     _childBuffer = _ChunkedConversionBuffer<List<XmlEvent>, XmlNode>(
       const XmlNodeDecoder(),
     );
@@ -154,9 +155,7 @@ class XMPPStreamParser
       for (final node in children) {
         if (node.nodeType == XmlNodeType.ELEMENT) {
           objects.add(
-            XMPPStreamElement(
-              XMLNode.fromXmlElement(node as XmlElement),
-            ),
+            XMPPStreamElement(XMLNode.fromXmlElement(node as XmlElement)),
           );
         }
       }

@@ -10,18 +10,18 @@ import 'package:moxxmpp/src/stringxml.dart';
 /// "Nonza" describing the XMPP stream header of a client-to-server connection.
 class ClientStreamHeaderNonza extends XMLNode {
   ClientStreamHeaderNonza(JID jid)
-      : super(
-          tag: 'stream:stream',
-          attributes: <String, String>{
-            'xmlns': stanzaXmlns,
-            'version': '1.0',
-            'xmlns:stream': streamXmlns,
-            'to': jid.domain,
-            'from': jid.toBare().toString(),
-            'xml:lang': 'en',
-          },
-          closeTag: false,
-        );
+    : super(
+        tag: 'stream:stream',
+        attributes: <String, String>{
+          'xmlns': stanzaXmlns,
+          'version': '1.0',
+          'xmlns:stream': streamXmlns,
+          'to': jid.domain,
+          'from': jid.toBare().toString(),
+          'xml:lang': 'en',
+        },
+        closeTag: false,
+      );
 }
 
 /// This class implements the stream feature negotiation for usage in client to server
@@ -67,9 +67,7 @@ class ClientToServerNegotiator extends NegotiationsHandler {
         attributes: {'version': '1.0'},
         closeTag: false,
         isDeclaration: true,
-        children: [
-          ClientStreamHeaderNonza(getConnectionSettings().jid),
-        ],
+        children: [ClientStreamHeaderNonza(getConnectionSettings().jid)],
       ),
     );
   }
@@ -96,17 +94,17 @@ class ClientToServerNegotiator extends NegotiationsHandler {
     List<XMLNode> features, {
     bool log = true,
   }) {
-    final matchingNegotiators =
-        negotiators.values.where((XmppFeatureNegotiatorBase negotiator) {
+    final matchingNegotiators = negotiators.values.where((
+      XmppFeatureNegotiatorBase negotiator,
+    ) {
       return negotiator.state == NegotiatorState.ready &&
           negotiator.matchesFeature(features);
-    }).toList()
-          ..sort((a, b) => b.priority.compareTo(a.priority));
+    }).toList()..sort((a, b) => b.priority.compareTo(a.priority));
 
     if (log) {
       this.log.finest(
-            'List of matching negotiators: ${matchingNegotiators.map((a) => a.id)}',
-          );
+        'List of matching negotiators: ${matchingNegotiators.map((a) => a.id)}',
+      );
     }
 
     if (matchingNegotiators.isEmpty) return null;

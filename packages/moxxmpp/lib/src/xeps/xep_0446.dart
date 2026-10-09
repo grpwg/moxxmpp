@@ -25,23 +25,28 @@ class FileMetadataData {
     assert(node.tag == 'file', 'Invalid element anme');
 
     final lengthElement = node.firstTag('length');
-    final length =
-        lengthElement != null ? int.parse(lengthElement.innerText()) : null;
+    final length = lengthElement != null
+        ? int.parse(lengthElement.innerText())
+        : null;
     final sizeElement = node.firstTag('size');
-    final size =
-        sizeElement != null ? int.parse(sizeElement.innerText()) : null;
+    final size = sizeElement != null
+        ? int.parse(sizeElement.innerText())
+        : null;
 
     final hashes = <HashFunction, String>{};
     for (final e in node.findTags('hash')) {
-      final hashFunction =
-          HashFunction.fromName(e.attributes['algo']! as String);
+      final hashFunction = HashFunction.fromName(
+        e.attributes['algo']! as String,
+      );
       hashes[hashFunction] = e.innerText();
     }
 
     // Thumbnails
     final thumbnails = List<JingleContentThumbnail>.empty(growable: true);
-    for (final i
-        in node.findTags('thumbnail', xmlns: jingleContentThumbnailXmlns)) {
+    for (final i in node.findTags(
+      'thumbnail',
+      xmlns: jingleContentThumbnailXmlns,
+    )) {
       thumbnails.add(JingleContentThumbnail.fromXML(i));
     }
 
@@ -110,15 +115,11 @@ class FileMetadataData {
     }
 
     for (final hash in hashes.entries) {
-      node.addChild(
-        constructHashElement(hash.key, hash.value),
-      );
+      node.addChild(constructHashElement(hash.key, hash.value));
     }
 
     for (final thumbnail in thumbnails) {
-      node.addChild(
-        thumbnail.toXML(),
-      );
+      node.addChild(thumbnail.toXML());
     }
 
     return node;

@@ -31,8 +31,8 @@ class DiscoManager extends XmppManagerBase {
   /// [identities] is a list of disco identities that should be added by default
   /// to a disco#info response.
   DiscoManager(List<Identity> identities)
-      : _identities = List<Identity>.from(identities),
-        super(discoManager);
+    : _identities = List<Identity>.from(identities),
+      super(discoManager);
 
   /// Our features
   final List<String> _features = List.empty(growable: true);
@@ -45,11 +45,11 @@ class DiscoManager extends XmppManagerBase {
 
   /// The tracker for tracking disco#info queries that are in flight.
   final WaitForTracker<DiscoCacheKey, Result<StanzaError, DiscoInfo>>
-      _discoInfoTracker = WaitForTracker();
+  _discoInfoTracker = WaitForTracker();
 
   /// The tracker for tracking disco#info queries that are in flight.
   final WaitForTracker<DiscoCacheKey, Result<StanzaError, List<DiscoItem>>>
-      _discoItemsTracker = WaitForTracker();
+  _discoItemsTracker = WaitForTracker();
 
   /// Cache lock
   final Lock _cacheLock = Lock();
@@ -68,23 +68,23 @@ class DiscoManager extends XmppManagerBase {
 
   @visibleForTesting
   WaitForTracker<DiscoCacheKey, Result<StanzaError, DiscoInfo>>
-      get infoTracker => _discoInfoTracker;
+  get infoTracker => _discoInfoTracker;
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          tagName: 'query',
-          tagXmlns: discoInfoXmlns,
-          stanzaTag: 'iq',
-          callback: _onDiscoInfoRequest,
-        ),
-        StanzaHandler(
-          tagName: 'query',
-          tagXmlns: discoItemsXmlns,
-          stanzaTag: 'iq',
-          callback: _onDiscoItemsRequest,
-        ),
-      ];
+    StanzaHandler(
+      tagName: 'query',
+      tagXmlns: discoInfoXmlns,
+      stanzaTag: 'iq',
+      callback: _onDiscoInfoRequest,
+    ),
+    StanzaHandler(
+      tagName: 'query',
+      tagXmlns: discoItemsXmlns,
+      stanzaTag: 'iq',
+      callback: _onDiscoItemsRequest,
+    ),
+  ];
 
   @override
   List<String> getDiscoFeatures() => [discoInfoXmlns, discoItemsXmlns];
@@ -155,13 +155,7 @@ class DiscoManager extends XmppManagerBase {
   /// query against our bare JID with no node. The results node attribute is set
   /// to [node].
   DiscoInfo getDiscoInfo(String? node) {
-    return DiscoInfo(
-      _features,
-      _identities,
-      const [],
-      node,
-      null,
-    );
+    return DiscoInfo(_features, _identities, const [], node, null);
   }
 
   Future<StanzaHandlerData> _onDiscoInfoRequest(
@@ -176,24 +170,12 @@ class DiscoManager extends XmppManagerBase {
     if (_discoInfoCallbacks.containsKey(node)) {
       // We can now assume that node != null
       final result = await _discoInfoCallbacks[node]!();
-      await reply(
-        state,
-        'result',
-        [
-          result.toXml(),
-        ],
-      );
+      await reply(state, 'result', [result.toXml()]);
 
       return state..done = true;
     }
 
-    await reply(
-      state,
-      'result',
-      [
-        getDiscoInfo(node).toXml(),
-      ],
-    );
+    await reply(state, 'result', [getDiscoInfo(node).toXml()]);
 
     return state..done = true;
   }
@@ -208,20 +190,14 @@ class DiscoManager extends XmppManagerBase {
     final node = query.attributes['node'] as String?;
     if (_discoItemsCallbacks.containsKey(node)) {
       final result = await _discoItemsCallbacks[node]!();
-      await reply(
-        state,
-        'result',
-        [
-          XMLNode.xmlns(
-            tag: 'query',
-            xmlns: discoItemsXmlns,
-            attributes: <String, String>{
-              'node': node!,
-            },
-            children: result.map((item) => item.toXml()).toList(),
-          ),
-        ],
-      );
+      await reply(state, 'result', [
+        XMLNode.xmlns(
+          tag: 'query',
+          xmlns: discoItemsXmlns,
+          attributes: <String, String>{'node': node!},
+          children: result.map((item) => item.toXml()).toList(),
+        ),
+      ]);
 
       return state..done = true;
     }
@@ -260,27 +236,29 @@ class DiscoManager extends XmppManagerBase {
   }) async {
     DiscoInfo? info;
     final cacheKey = DiscoCacheKey(entity, node);
-    final ecm = getAttributes()
-        .getManagerById<EntityCapabilitiesManager>(entityCapabilitiesManager);
+    final ecm = getAttributes().getManagerById<EntityCapabilitiesManager>(
+      entityCapabilitiesManager,
+    );
     final ffuture = await _cacheLock
         .synchronized<Future<Future<Result<StanzaError, DiscoInfo>>?>?>(
-            () async {
-      // Check if we already know what the JID supports
-      if (_discoInfoCache.containsKey(cacheKey)) {
-        info = _discoInfoCache[cacheKey];
-        return null;
-      } else {
-        // Check if we know entity capabilities
-        if (ecm != null && node == null) {
-          info = await ecm.getCachedDiscoInfoFromJid(entity);
-          if (info != null) {
-            return null;
-          }
-        }
+          () async {
+            // Check if we already know what the JID supports
+            if (_discoInfoCache.containsKey(cacheKey)) {
+              info = _discoInfoCache[cacheKey];
+              return null;
+            } else {
+              // Check if we know entity capabilities
+              if (ecm != null && node == null) {
+                info = await ecm.getCachedDiscoInfoFromJid(entity);
+                if (info != null) {
+                  return null;
+                }
+              }
 
-        return _discoInfoTracker.waitFor(cacheKey);
-      }
-    });
+              return _discoInfoTracker.waitFor(cacheKey);
+            }
+          },
+        );
 
     if (info != null) {
       return Result<DiscoError, DiscoInfo>(info);
@@ -300,8 +278,9 @@ class DiscoManager extends XmppManagerBase {
 
     // Error handling
     if (stanza.attributes['type'] == 'error') {
-      final result =
-          Result<StanzaError, DiscoInfo>(StanzaError.fromXMLNode(stanza));
+      final result = Result<StanzaError, DiscoInfo>(
+        StanzaError.fromXMLNode(stanza),
+      );
       await _exitDiscoInfoCriticalSection(cacheKey, result, shouldCache);
       return result;
     }
@@ -314,10 +293,7 @@ class DiscoManager extends XmppManagerBase {
     }
 
     final result = Result<DiscoError, DiscoInfo>(
-      DiscoInfo.fromQuery(
-        query,
-        entity,
-      ),
+      DiscoInfo.fromQuery(query, entity),
     );
     await _exitDiscoInfoCriticalSection(cacheKey, result, shouldCache);
     return result;
@@ -344,16 +320,18 @@ class DiscoManager extends XmppManagerBase {
 
     // Error handling
     if (stanza.attributes['type'] == 'error') {
-      final result =
-          Result<StanzaError, List<DiscoItem>>(StanzaError.fromXMLNode(stanza));
+      final result = Result<StanzaError, List<DiscoItem>>(
+        StanzaError.fromXMLNode(stanza),
+      );
       await _discoItemsTracker.resolve(key, result);
       return result;
     }
 
     final query = stanza.firstTag('query');
     if (query == null) {
-      final result =
-          Result<DiscoError, List<DiscoItem>>(InvalidResponseDiscoError());
+      final result = Result<DiscoError, List<DiscoItem>>(
+        InvalidResponseDiscoError(),
+      );
       await _discoItemsTracker.resolve(key, result);
       return result;
     }

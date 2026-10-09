@@ -41,15 +41,17 @@ void main() {
         ''',
       ),
     ]);
-    final conn = XmppConnection(
-      TestingReconnectionPolicy(),
-      AlwaysConnectedConnectivityManager(),
-      ClientToServerNegotiator(),
-      fakeSocket,
-    )..connectionSettings = ConnectionSettings(
-        jid: JID.fromString('polynomdivision@test.server'),
-        password: 'aaaa',
-      );
+    final conn =
+        XmppConnection(
+            TestingReconnectionPolicy(),
+            AlwaysConnectedConnectivityManager(),
+            ClientToServerNegotiator(),
+            fakeSocket,
+          )
+          ..connectionSettings = ConnectionSettings(
+            jid: JID.fromString('polynomdivision@test.server'),
+            password: 'aaaa',
+          );
     await conn.registerManagers([
       PresenceManager(),
       RosterManager(TestingRosterStateManager('', [])),
@@ -111,15 +113,17 @@ void main() {
         ''',
       ),
     ]);
-    final conn = XmppConnection(
-      TestingReconnectionPolicy(),
-      AlwaysConnectedConnectivityManager(),
-      ClientToServerNegotiator(),
-      fakeSocket,
-    )..connectionSettings = ConnectionSettings(
-        jid: JID.fromString('polynomdivision@test.server'),
-        password: 'aaaa',
-      );
+    final conn =
+        XmppConnection(
+            TestingReconnectionPolicy(),
+            AlwaysConnectedConnectivityManager(),
+            ClientToServerNegotiator(),
+            fakeSocket,
+          )
+          ..connectionSettings = ConnectionSettings(
+            jid: JID.fromString('polynomdivision@test.server'),
+            password: 'aaaa',
+          );
     await conn.registerManagers([
       RosterManager(TestingRosterStateManager('', [])),
       DiscoManager([]),

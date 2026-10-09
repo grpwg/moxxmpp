@@ -24,7 +24,7 @@ typedef PresencePreSendCallback = Future<List<XMLNode>> Function();
 /// requests, shown by [PresenceNegotiator.preApprovalSupported].
 class PresenceNegotiator extends XmppFeatureNegotiatorBase {
   PresenceNegotiator()
-      : super(11, false, subscriptionPreApprovalXmlns, presenceNegotiator);
+    : super(11, false, subscriptionPreApprovalXmlns, presenceNegotiator);
 
   /// Flag indicating whether presence subscription pre-approval is supported
   bool _supported = false;
@@ -52,8 +52,9 @@ class PresenceManager extends XmppManagerBase {
   PresenceManager() : super(presenceManager);
 
   /// The list of pre-send callbacks.
-  final List<PresencePreSendCallback> _presenceCallbacks =
-      List.empty(growable: true);
+  final List<PresencePreSendCallback> _presenceCallbacks = List.empty(
+    growable: true,
+  );
 
   /// The priority of the presence handler. If a handler should run before this one,
   /// which terminates processing, make sure the handler has a priority greater than
@@ -62,12 +63,12 @@ class PresenceManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'presence',
-          callback: _onPresence,
-          priority: presenceHandlerPriority,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'presence',
+      callback: _onPresence,
+      priority: presenceHandlerPriority,
+    ),
+  ];
 
   @override
   List<String> getDiscoFeatures() => [capsXmlns];
@@ -121,25 +122,16 @@ class PresenceManager extends XmppManagerBase {
 
   /// Sends the initial presence to enable receiving messages.
   Future<void> sendInitialPresence() async {
-    final children = List<XMLNode>.from([
-      XMLNode(
-        tag: 'show',
-        text: 'chat',
-      ),
-    ]);
+    final children = List<XMLNode>.from([XMLNode(tag: 'show', text: 'chat')]);
 
     for (final callback in _presenceCallbacks) {
-      children.addAll(
-        await callback(),
-      );
+      children.addAll(await callback());
     }
 
     final attrs = getAttributes();
     await attrs.sendStanza(
       StanzaDetails(
-        Stanza.presence(
-          children: children,
-        ),
+        Stanza.presence(children: children),
         awaitable: false,
         addId: false,
       ),
@@ -153,9 +145,7 @@ class PresenceManager extends XmppManagerBase {
     // until we're actually ready.
     await getAttributes().sendStanza(
       StanzaDetails(
-        Stanza.presence(
-          type: 'unavailable',
-        ),
+        Stanza.presence(type: 'unavailable'),
         awaitable: false,
         bypassQueue: true,
         postSendExtensions: TypedMap<StanzaHandlerExtension>.fromList([
@@ -172,8 +162,9 @@ class PresenceManager extends XmppManagerBase {
   /// Returns true, when the stanza was sent. Returns false, when the stanza was not sent,
   /// for example because the server does not support subscription pre-approvals.
   Future<bool> preApproveSubscription(JID to) async {
-    final negotiator = getAttributes()
-        .getNegotiatorById<PresenceNegotiator>(presenceNegotiator);
+    final negotiator = getAttributes().getNegotiatorById<PresenceNegotiator>(
+      presenceNegotiator,
+    );
     assert(negotiator != null, 'No PresenceNegotiator registered');
 
     if (!negotiator!.preApprovalSupported) {
@@ -182,10 +173,7 @@ class PresenceManager extends XmppManagerBase {
 
     await getAttributes().sendStanza(
       StanzaDetails(
-        Stanza.presence(
-          type: 'subscribed',
-          to: to.toString(),
-        ),
+        Stanza.presence(type: 'subscribed', to: to.toString()),
         awaitable: false,
       ),
     );
@@ -196,10 +184,7 @@ class PresenceManager extends XmppManagerBase {
   Future<void> requestSubscription(JID to) async {
     await getAttributes().sendStanza(
       StanzaDetails(
-        Stanza.presence(
-          type: 'subscribe',
-          to: to.toString(),
-        ),
+        Stanza.presence(type: 'subscribe', to: to.toString()),
         awaitable: false,
       ),
     );
@@ -209,10 +194,7 @@ class PresenceManager extends XmppManagerBase {
   Future<void> acceptSubscriptionRequest(JID to) async {
     await getAttributes().sendStanza(
       StanzaDetails(
-        Stanza.presence(
-          type: 'subscribed',
-          to: to.toString(),
-        ),
+        Stanza.presence(type: 'subscribed', to: to.toString()),
         awaitable: false,
       ),
     );
@@ -222,10 +204,7 @@ class PresenceManager extends XmppManagerBase {
   Future<void> rejectSubscriptionRequest(JID to) async {
     await getAttributes().sendStanza(
       StanzaDetails(
-        Stanza.presence(
-          type: 'unsubscribed',
-          to: to.toString(),
-        ),
+        Stanza.presence(type: 'unsubscribed', to: to.toString()),
         awaitable: false,
       ),
     );
@@ -235,10 +214,7 @@ class PresenceManager extends XmppManagerBase {
   Future<void> unsubscribe(JID to) async {
     await getAttributes().sendStanza(
       StanzaDetails(
-        Stanza.presence(
-          type: 'unsubscribe',
-          to: to.toString(),
-        ),
+        Stanza.presence(type: 'unsubscribe', to: to.toString()),
         awaitable: false,
       ),
     );

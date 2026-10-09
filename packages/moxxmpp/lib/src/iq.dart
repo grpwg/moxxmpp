@@ -14,20 +14,11 @@ Future<void> handleUnhandledStanza(
       to: data.stanza.from,
       from: data.stanza.to,
       type: 'error',
-      children: [
-        buildErrorElement(
-          'cancel',
-          'feature-not-implemented',
-        ),
-      ],
+      children: [buildErrorElement('cancel', 'feature-not-implemented')],
     );
 
     await conn.sendStanza(
-      StanzaDetails(
-        stanza,
-        awaitable: false,
-        forceEncryption: data.encrypted,
-      ),
+      StanzaDetails(stanza, awaitable: false, forceEncryption: data.encrypted),
     );
   }
 }

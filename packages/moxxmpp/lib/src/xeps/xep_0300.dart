@@ -123,13 +123,13 @@ class CryptographicHashManager extends XmppManagerBase {
   ///       function, for example for XEP-0115.
   @override
   List<String> getDiscoFeatures() => [
-        '$hashFunctionNameBaseXmlns:$_hashSha256',
-        '$hashFunctionNameBaseXmlns:$_hashSha512',
-        //'$hashFunctionNameBaseXmlns:$_hashSha3256',
-        //'$hashFunctionNameBaseXmlns:$_hashSha3512',
-        //'$hashFunctionNameBaseXmlns:$_hashBlake2b256',
-        '$hashFunctionNameBaseXmlns:$_hashBlake2b512',
-      ];
+    '$hashFunctionNameBaseXmlns:$_hashSha256',
+    '$hashFunctionNameBaseXmlns:$_hashSha512',
+    //'$hashFunctionNameBaseXmlns:$_hashSha3256',
+    //'$hashFunctionNameBaseXmlns:$_hashSha3512',
+    //'$hashFunctionNameBaseXmlns:$_hashBlake2b256',
+    '$hashFunctionNameBaseXmlns:$_hashBlake2b512',
+  ];
 
   /// Compute the raw hash value of [data] using the algorithm specified by [function].
   /// If the function is not supported, an exception will be thrown.

@@ -12,21 +12,12 @@ import 'package:moxxmpp/src/util/typed_map.dart';
 
 /// A reply to a message.
 class ReplyData implements StanzaHandlerExtension {
-  const ReplyData(
-    this.id, {
-    this.body,
-    this.jid,
-    this.start,
-    this.end,
-  });
+  const ReplyData(this.id, {this.body, this.jid, this.start, this.end});
 
-  ReplyData.fromQuoteData(
-    this.id,
-    QuoteData quote, {
-    this.jid,
-  })  : body = quote.body,
-        start = 0,
-        end = quote.fallbackLength;
+  ReplyData.fromQuoteData(this.id, QuoteData quote, {this.jid})
+    : body = quote.body,
+      start = 0,
+      end = quote.fallbackLength;
 
   /// The JID of the entity whose message we are replying to.
   final JID? jid;
@@ -64,10 +55,7 @@ class QuoteData {
   factory QuoteData.fromBodies(String quoteBody, String body) {
     final fallback = quoteBody.split('\n').map((line) => '> $line\n').join();
 
-    return QuoteData(
-      '$fallback$body',
-      fallback.length,
-    );
+    return QuoteData('$fallback$body', fallback.length);
   }
 
   /// The new body with fallback data at the beginning
@@ -83,21 +71,19 @@ class MessageRepliesManager extends XmppManagerBase {
   MessageRepliesManager() : super(messageRepliesManager);
 
   @override
-  List<String> getDiscoFeatures() => [
-        replyXmlns,
-      ];
+  List<String> getDiscoFeatures() => [replyXmlns];
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'message',
-          tagName: 'reply',
-          tagXmlns: replyXmlns,
-          callback: _onMessage,
-          // Before the message handler
-          priority: -99,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'message',
+      tagName: 'reply',
+      tagXmlns: replyXmlns,
+      callback: _onMessage,
+      // Before the message handler
+      priority: -99,
+    ),
+  ];
 
   @override
   Future<bool> isSupported() async => true;
@@ -121,11 +107,7 @@ class MessageRepliesManager extends XmppManagerBase {
           'id': data.id,
         },
       ),
-      if (data.body != null)
-        XMLNode(
-          tag: 'body',
-          text: data.body,
-        ),
+      if (data.body != null) XMLNode(tag: 'body', text: data.body),
       if (data.body != null)
         XMLNode.xmlns(
           tag: 'fallback',
@@ -155,8 +137,10 @@ class MessageRepliesManager extends XmppManagerBase {
     int? end;
 
     // TODO(Unknown): Maybe extend firstTag to also look for attributes
-    final fallback =
-        stanza.firstTag('fallback', xmlns: fallbackIndicationXmlns);
+    final fallback = stanza.firstTag(
+      'fallback',
+      xmlns: fallbackIndicationXmlns,
+    );
     if (fallback != null) {
       final body = fallback.firstTag('body')!;
       start = int.parse(body.attributes['start']! as String);

@@ -122,7 +122,8 @@ class GenericStanzaError extends StanzaError {
   final String condition;
 
   @override
-  String toString() => 'GenericStanzaError(type: $type, code: $code, '
+  String toString() =>
+      'GenericStanzaError(type: $type, code: $code, '
       'condition: $condition${text.isEmpty ? '' : ', text: $text'})';
 }
 
@@ -161,21 +162,21 @@ class Stanza extends XMLNode {
     Map<String, String> attributes = const {},
     String? xmlns,
   }) : super(
-          tag: tag,
-          attributes: <String, dynamic>{
-            ...attributes,
-            ...type != null
-                ? <String, dynamic>{'type': type}
-                : <String, dynamic>{},
-            ...id != null ? <String, dynamic>{'id': id} : <String, dynamic>{},
-            ...to != null ? <String, dynamic>{'to': to} : <String, dynamic>{},
-            ...from != null
-                ? <String, dynamic>{'from': from}
-                : <String, dynamic>{},
-            if (xmlns != null) 'xmlns': xmlns,
-          },
-          children: children,
-        );
+         tag: tag,
+         attributes: <String, dynamic>{
+           ...attributes,
+           ...type != null
+               ? <String, dynamic>{'type': type}
+               : <String, dynamic>{},
+           ...id != null ? <String, dynamic>{'id': id} : <String, dynamic>{},
+           ...to != null ? <String, dynamic>{'to': to} : <String, dynamic>{},
+           ...from != null
+               ? <String, dynamic>{'from': from}
+               : <String, dynamic>{},
+           if (xmlns != null) 'xmlns': xmlns,
+         },
+         children: children,
+       );
 
   factory Stanza.iq({
     String? to,
@@ -249,8 +250,10 @@ class Stanza extends XMLNode {
       children: node.children,
       // TODO(Unknown): Remove to, from, id, and type
       // TODO(Unknown): Not sure if this is the correct way to approach this
-      attributes:
-          node.attributes.map<String, String>((String key, dynamic value) {
+      attributes: node.attributes.map<String, String>((
+        String key,
+        dynamic value,
+      ) {
         return MapEntry(key, value.toString());
       }),
     );
@@ -276,9 +279,7 @@ class Stanza extends XMLNode {
       id: id ?? this.id,
       type: type ?? this.type,
       children: children ?? this.children,
-      attributes: {
-        ...attributes.cast<String, String>(),
-      },
+      attributes: {...attributes.cast<String, String>()},
       xmlns: xmlns ?? this.xmlns,
     );
   }
@@ -297,11 +298,7 @@ XMLNode buildErrorElement(String type, String condition, {String? text}) {
         xmlns: fullStanzaXmlns,
         children: [
           if (text != null)
-            XMLNode.xmlns(
-              tag: 'text',
-              xmlns: fullStanzaXmlns,
-              text: text,
-            ),
+            XMLNode.xmlns(tag: 'text', xmlns: fullStanzaXmlns, text: text),
         ],
       ),
     ],

@@ -26,14 +26,14 @@ class DelayedDeliveryManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'message',
-          tagName: 'delay',
-          tagXmlns: delayedDeliveryXmlns,
-          callback: _onIncomingMessage,
-          priority: 200,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'message',
+      tagName: 'delay',
+      tagXmlns: delayedDeliveryXmlns,
+      callback: _onIncomingMessage,
+      priority: 200,
+    ),
+  ];
 
   Future<StanzaHandlerData> _onIncomingMessage(
     Stanza stanza,

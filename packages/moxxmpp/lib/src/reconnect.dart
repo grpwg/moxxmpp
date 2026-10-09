@@ -39,9 +39,7 @@ abstract class ReconnectionPolicy {
   }
 
   /// Called by XmppConnection to register the policy.
-  void register(
-    PerformReconnectFunction performReconnect,
-  ) {
+  void register(PerformReconnectFunction performReconnect) {
     this.performReconnect = performReconnect;
   }
 
@@ -85,14 +83,12 @@ abstract class ReconnectionPolicy {
 /// for every failed attempt.
 /// NOTE: This ReconnectionPolicy may be broken
 class RandomBackoffReconnectionPolicy extends ReconnectionPolicy {
-  RandomBackoffReconnectionPolicy(
-    this._minBackoffTime,
-    this._maxBackoffTime,
-  )   : assert(
-          _minBackoffTime < _maxBackoffTime,
-          '_minBackoffTime must be smaller than _maxBackoffTime',
-        ),
-        super();
+  RandomBackoffReconnectionPolicy(this._minBackoffTime, this._maxBackoffTime)
+    : assert(
+        _minBackoffTime < _maxBackoffTime,
+        '_minBackoffTime must be smaller than _maxBackoffTime',
+      ),
+      super();
 
   /// The maximum time in seconds that a backoff should be.
   final int _maxBackoffTime;
@@ -115,9 +111,7 @@ class RandomBackoffReconnectionPolicy extends ReconnectionPolicy {
     final shouldContinue = await _timerLock.synchronized(() async {
       _log.finest('Timer lock aquired');
       if (_timer == null) {
-        _log.finest(
-          'The timer is already set to null. Doing nothing.',
-        );
+        _log.finest('The timer is already set to null. Doing nothing.');
         return false;
       }
 
@@ -126,9 +120,7 @@ class RandomBackoffReconnectionPolicy extends ReconnectionPolicy {
       }
 
       if (!(await getShouldReconnect())) {
-        _log.finest(
-          'Should not reconnect. Stopping here.',
-        );
+        _log.finest('Should not reconnect. Stopping here.');
         return false;
       }
 

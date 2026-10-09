@@ -34,7 +34,9 @@ const extendedAddressingXmlns = 'http://jabber.org/protocol/address';
 const mucXmlns = 'http://jabber.org/protocol/muc';
 const mucUserXmlns = 'http://jabber.org/protocol/muc#user';
 const mucAdminXmlns = 'http://jabber.org/protocol/muc#admin';
+const mucOwnerXmlns = 'http://jabber.org/protocol/muc#owner';
 const roomInfoFormType = 'http://jabber.org/protocol/muc#roominfo';
+const roomConfigFormType = 'http://jabber.org/protocol/muc#roomconfig';
 
 // XEP-0054
 const vCardTempXmlns = 'vcard-temp';

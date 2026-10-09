@@ -36,8 +36,7 @@ Map<String, String> prepareHeaders(Map<String, String> headers) {
       _stripNewlinesFromString(key),
       _stripNewlinesFromString(value),
     );
-  })
-    ..removeWhere((key, _) => !allowedHTTPHeaders.contains(key.toLowerCase()));
+  })..removeWhere((key, _) => !allowedHTTPHeaders.contains(key.toLowerCase()));
 }
 
 class HttpFileUploadManager extends XmppManagerBase {
@@ -180,19 +179,10 @@ class HttpFileUploadManager extends XmppManagerBase {
     final getUrl = slot.firstTag('get')!.attributes['url']! as String;
     final headers = Map<String, String>.fromEntries(
       slot.findTags('header').map((tag) {
-        return MapEntry(
-          tag.attributes['name']! as String,
-          tag.innerText(),
-        );
+        return MapEntry(tag.attributes['name']! as String, tag.innerText());
       }),
     );
 
-    return Result(
-      HttpFileUploadSlot(
-        putUrl,
-        getUrl,
-        prepareHeaders(headers),
-      ),
-    );
+    return Result(HttpFileUploadSlot(putUrl, getUrl, prepareHeaders(headers)));
   }
 }

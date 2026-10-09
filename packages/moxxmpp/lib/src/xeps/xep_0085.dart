@@ -48,10 +48,7 @@ enum ChatState implements StanzaHandlerExtension {
   }
 
   XMLNode toXML() {
-    return XMLNode.xmlns(
-      tag: toName(),
-      xmlns: chatStateXmlns,
-    );
+    return XMLNode.xmlns(tag: toName(), xmlns: chatStateXmlns);
   }
 }
 
@@ -63,14 +60,14 @@ class ChatStateManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'message',
-          tagXmlns: chatStateXmlns,
-          callback: _onChatStateReceived,
-          // Before the message handler
-          priority: -99,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'message',
+      tagXmlns: chatStateXmlns,
+      callback: _onChatStateReceived,
+      // Before the message handler
+      priority: -99,
+    ),
+  ];
 
   @override
   Future<bool> isSupported() async => true;
@@ -99,13 +96,7 @@ class ChatStateManager extends XmppManagerBase {
   }) async {
     await getAttributes().sendStanza(
       StanzaDetails(
-        Stanza.message(
-          to: to,
-          type: messageType,
-          children: [
-            state.toXML(),
-          ],
-        ),
+        Stanza.message(to: to, type: messageType, children: [state.toXML()]),
         awaitable: false,
       ),
     );
@@ -115,11 +106,7 @@ class ChatStateManager extends XmppManagerBase {
     TypedMap<StanzaHandlerExtension> extensions,
   ) {
     final data = extensions.get<ChatState>();
-    return data != null
-        ? [
-            data.toXML(),
-          ]
-        : [];
+    return data != null ? [data.toXML()] : [];
   }
 
   @override

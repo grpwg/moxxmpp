@@ -47,5 +47,5 @@ class XmppManagerAttributes {
   final XmppConnection Function() getConnection;
 
   final T? Function<T extends XmppFeatureNegotiatorBase>(String)
-      getNegotiatorById;
+  getNegotiatorById;
 }

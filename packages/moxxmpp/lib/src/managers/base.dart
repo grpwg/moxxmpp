@@ -140,8 +140,9 @@ abstract class XmppManagerBase {
   /// for plugins to reset their cache in case of a new stream.
   /// The value only makes sense after receiving a StreamNegotiationsDoneEvent.
   Future<bool> isNewStream() async {
-    final sm =
-        getAttributes().getManagerById<StreamManagementManager>(smManager);
+    final sm = getAttributes().getManagerById<StreamManagementManager>(
+      smManager,
+    );
 
     return sm?.streamResumed == false;
   }
@@ -168,11 +169,7 @@ abstract class XmppManagerBase {
     );
 
     await getAttributes().sendStanza(
-      StanzaDetails(
-        stanza,
-        awaitable: false,
-        forceEncryption: data.encrypted,
-      ),
+      StanzaDetails(stanza, awaitable: false, forceEncryption: data.encrypted),
     );
   }
 }

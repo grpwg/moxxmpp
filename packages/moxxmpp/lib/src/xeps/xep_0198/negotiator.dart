@@ -30,7 +30,7 @@ enum _StreamManagementNegotiatorState {
 class StreamManagementNegotiator extends Sasl2FeatureNegotiator
     implements Bind2FeatureNegotiatorInterface {
   StreamManagementNegotiator()
-      : super(10, false, smXmlns, streamManagementNegotiator);
+    : super(10, false, smXmlns, streamManagementNegotiator);
 
   /// Stream Management negotiation state.
   _StreamManagementNegotiatorState _state =
@@ -69,9 +69,7 @@ class StreamManagementNegotiator extends Sasl2FeatureNegotiator
     // with the authentication.
     if (sm.state.streamResumptionId != null && !_resumeFailed) {
       // We can try to resume the stream or enable the stream
-      return features.firstWhereOrNull(
-            (child) => child.xmlns == smXmlns,
-          ) !=
+      return features.firstWhereOrNull((child) => child.xmlns == smXmlns) !=
           null;
     } else {
       // We can try to enable SM
@@ -170,8 +168,9 @@ class StreamManagementNegotiator extends Sasl2FeatureNegotiator
 
     switch (_state) {
       case _StreamManagementNegotiatorState.ready:
-        final sm =
-            attributes.getManagerById<StreamManagementManager>(smManager)!;
+        final sm = attributes.getManagerById<StreamManagementManager>(
+          smManager,
+        )!;
         final srid = sm.state.streamResumptionId;
         final h = sm.state.s2c;
 
@@ -251,9 +250,7 @@ class StreamManagementNegotiator extends Sasl2FeatureNegotiator
     }
 
     _inlineStreamEnablementRequested = true;
-    return [
-      StreamManagementEnableNonza(),
-    ];
+    return [StreamManagementEnableNonza()];
   }
 
   @override
@@ -276,12 +273,7 @@ class StreamManagementNegotiator extends Sasl2FeatureNegotiator
       return [];
     }
 
-    return [
-      StreamManagementResumeNonza(
-        srid,
-        h,
-      ),
-    ];
+    return [StreamManagementResumeNonza(srid, h)];
   }
 
   @override

@@ -62,8 +62,9 @@ class StatelessFileSharingEncryptedSource extends StatelessFileSharingSource {
     // Find hashes
     final hashes = <HashFunction, String>{};
     for (final hash in element.findTags('hash', xmlns: hashXmlns)) {
-      final hashFunction =
-          HashFunction.fromName(hash.attributes['algo']! as String);
+      final hashFunction = HashFunction.fromName(
+        hash.attributes['algo']! as String,
+      );
       hashes[hashFunction] = hash.text!;
     }
 
@@ -87,20 +88,13 @@ class StatelessFileSharingEncryptedSource extends StatelessFileSharingSource {
     return XMLNode.xmlns(
       tag: 'encrypted',
       xmlns: sfsEncryptionXmlns,
-      attributes: <String, String>{
-        'cipher': encryption.toNamespace(),
-      },
+      attributes: <String, String>{'cipher': encryption.toNamespace()},
       children: [
-        XMLNode(
-          tag: 'key',
-          text: base64Encode(key),
+        XMLNode(tag: 'key', text: base64Encode(key)),
+        XMLNode(tag: 'iv', text: base64Encode(iv)),
+        ...hashes.entries.map(
+          (hash) => constructHashElement(hash.key, hash.value),
         ),
-        XMLNode(
-          tag: 'iv',
-          text: base64Encode(iv),
-        ),
-        ...hashes.entries
-            .map((hash) => constructHashElement(hash.key, hash.value)),
         XMLNode.xmlns(
           tag: 'sources',
           xmlns: sfsXmlns,

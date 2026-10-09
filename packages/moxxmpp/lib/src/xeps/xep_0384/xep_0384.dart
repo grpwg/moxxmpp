@@ -27,14 +27,12 @@ import 'package:omemo_dart/omemo_dart.dart' show NoKeyMaterialAvailableError;
 import 'package:omemo_dart/omemo_dart_axolotl.dart' as axolotl;
 
 /// Acquire the axolotl (OMEMO 0.3.0 / Conversations) manager.
-typedef GetOmemoManagerCallback = Future<axolotl.AxolotlOmemoManager>
-    Function();
+typedef GetOmemoManagerCallback =
+    Future<axolotl.AxolotlOmemoManager> Function();
 
 /// Whether a stanza should be encrypted.
-typedef ShouldEncryptStanzaCallback = Future<bool> Function(
-  JID toJid,
-  Stanza stanza,
-);
+typedef ShouldEncryptStanzaCallback =
+    Future<bool> Function(JID toJid, Stanza stanza);
 
 const _doNotEncryptList = [
   DoNotEncrypt('addresses', extendedAddressingXmlns),
@@ -66,7 +64,7 @@ const axolotlFallbackBody =
 /// (`eu.siacs.conversations.axolotl`, AES-128-GCM, libsignal).
 class OmemoManager extends XmppManagerBase {
   OmemoManager(this._getOmemoManager, this._shouldEncryptStanza)
-      : super(omemoManager);
+    : super(omemoManager);
 
   final GetOmemoManagerCallback _getOmemoManager;
   final ShouldEncryptStanzaCallback _shouldEncryptStanza;
@@ -76,42 +74,36 @@ class OmemoManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingPreStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'iq',
-          tagXmlns: emeOmemo,
-          tagName: 'encrypted',
-          callback: _onIncomingStanza,
-        ),
-        StanzaHandler(
-          stanzaTag: 'presence',
-          tagXmlns: emeOmemo,
-          tagName: 'encrypted',
-          callback: _onIncomingStanza,
-        ),
-        StanzaHandler(
-          stanzaTag: 'message',
-          tagXmlns: emeOmemo,
-          tagName: 'encrypted',
-          callback: _onIncomingStanza,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'iq',
+      tagXmlns: emeOmemo,
+      tagName: 'encrypted',
+      callback: _onIncomingStanza,
+    ),
+    StanzaHandler(
+      stanzaTag: 'presence',
+      tagXmlns: emeOmemo,
+      tagName: 'encrypted',
+      callback: _onIncomingStanza,
+    ),
+    StanzaHandler(
+      stanzaTag: 'message',
+      tagXmlns: emeOmemo,
+      tagName: 'encrypted',
+      callback: _onIncomingStanza,
+    ),
+  ];
 
   @override
   List<StanzaHandler> getOutgoingPreStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'iq',
-          callback: _onOutgoingStanza,
-        ),
-        StanzaHandler(
-          stanzaTag: 'presence',
-          callback: _onOutgoingStanza,
-        ),
-        StanzaHandler(
-          stanzaTag: 'message',
-          callback: _onOutgoingStanza,
-          priority: 100,
-        ),
-      ];
+    StanzaHandler(stanzaTag: 'iq', callback: _onOutgoingStanza),
+    StanzaHandler(stanzaTag: 'presence', callback: _onOutgoingStanza),
+    StanzaHandler(
+      stanzaTag: 'message',
+      callback: _onOutgoingStanza,
+      priority: 100,
+    ),
+  ];
 
   @override
   Future<void> onXmppEvent(XmppEvent event) async {
@@ -180,11 +172,7 @@ class OmemoManager extends XmppManagerBase {
 
     final headerChildren = <XMLNode>[
       ...keyChildren,
-      if (result.iv != null)
-        XMLNode(
-          tag: 'iv',
-          text: base64Encode(result.iv!),
-        ),
+      if (result.iv != null) XMLNode(tag: 'iv', text: base64Encode(result.iv!)),
     ];
 
     return XMLNode.xmlns(
@@ -192,15 +180,10 @@ class OmemoManager extends XmppManagerBase {
       xmlns: emeOmemo,
       children: [
         if (result.ciphertext != null)
-          XMLNode(
-            tag: 'payload',
-            text: base64Encode(result.ciphertext!),
-          ),
+          XMLNode(tag: 'payload', text: base64Encode(result.ciphertext!)),
         XMLNode(
           tag: 'header',
-          attributes: <String, String>{
-            'sid': deviceId.toString(),
-          },
+          attributes: <String, String>{'sid': deviceId.toString()},
           children: headerChildren,
         ),
       ],
@@ -230,10 +213,7 @@ class OmemoManager extends XmppManagerBase {
   Future<void> sendOmemoHeartbeat(String jid) async {
     final om = await _getOmemoManager();
     final result = await om.onOutgoingStanza(
-      axolotl.AxolotlOutgoingStanza(
-        recipientJids: [jid],
-        payload: null,
-      ),
+      axolotl.AxolotlOutgoingStanza(recipientJids: [jid], payload: null),
     );
     if (result.canSend) {
       await sendEmptyMessageImpl(result, jid);
@@ -304,7 +284,8 @@ class OmemoManager extends XmppManagerBase {
     }
 
     logger.finest('Beginning axolotl encryption');
-    final carbonsEnabled = getAttributes()
+    final carbonsEnabled =
+        getAttributes()
             .getManagerById<CarbonsManager>(carbonsManager)
             ?.isEnabled ??
         false;
@@ -314,14 +295,8 @@ class OmemoManager extends XmppManagerBase {
     // room and must not be treated as an OMEMO peer.
     final override = state.omemoRecipientJids;
     final encryptToJids = override != null && override.isNotEmpty
-        ? <String>{
-            ...override,
-            ownBare,
-          }.toList()
-        : [
-            toJid.toString(),
-            if (carbonsEnabled) ownBare,
-          ];
+        ? <String>{...override, ownBare}.toList()
+        : [toJid.toString(), if (carbonsEnabled) ownBare];
     final plaintext = bodyText != null ? utf8.encode(bodyText) : null;
     final result = await om.onOutgoingStanza(
       axolotl.AxolotlOutgoingStanza(
@@ -333,28 +308,23 @@ class OmemoManager extends XmppManagerBase {
 
     if (!result.canSend) {
       // Prefer an error against the primary peer; for MUC any recipient error.
-      final ownErrors = result.deviceEncryptionErrors[toJid.toString()] ??
+      final ownErrors =
+          result.deviceEncryptionErrors[toJid.toString()] ??
           (override != null && override.isNotEmpty
               ? result.deviceEncryptionErrors[override.first]
               : null);
       return state
         ..cancel = true
-        ..cancelReason = ownErrors != null &&
+        ..cancelReason =
+            ownErrors != null &&
                 ownErrors.first.error is NoKeyMaterialAvailableError
             ? OmemoNotSupportedForContactException()
             : UnknownOmemoError()
-        ..encryptionError = OmemoEncryptionError(
-          result.deviceEncryptionErrors,
-        );
+        ..encryptionError = OmemoEncryptionError(result.deviceEncryptionErrors);
     }
 
     children
-      ..add(
-        XMLNode(
-          tag: 'body',
-          text: axolotlFallbackBody,
-        ),
-      )
+      ..add(XMLNode(tag: 'body', text: axolotlFallbackBody))
       ..add(_buildEncryptedElement(result, await _getDeviceId()));
 
     if (stanza.tag == 'message') {
@@ -384,8 +354,8 @@ class OmemoManager extends XmppManagerBase {
       final muc = getAttributes().getManagerById<MUCManager>(mucManager);
       final nick = fromFull.resource;
       final room = await muc?.getRoomState(fromFull.toBare());
-      final real =
-          (nick.isEmpty ? null : room?.members[nick]?.realJid)?.toBare();
+      final real = (nick.isEmpty ? null : room?.members[nick]?.realJid)
+          ?.toBare();
       if (real == null) {
         logger.finest(
           'OMEMO groupchat from anonymous occupant ${stanza.from}; '
@@ -457,12 +427,7 @@ class OmemoManager extends XmppManagerBase {
     }
 
     if (result.payload != null) {
-      children.add(
-        XMLNode(
-          tag: 'body',
-          text: result.payload!,
-        ),
-      );
+      children.add(XMLNode(tag: 'body', text: result.payload!));
     }
 
     if (stanza.tag == 'message' && encrypted.firstTag('payload') == null) {
@@ -487,12 +452,7 @@ class OmemoManager extends XmppManagerBase {
         tag: stanza.tag,
         attributes: Map<String, String>.from(stanza.attributes),
       )
-      ..extensions.set<OmemoData>(
-        OmemoData(
-          result.newSessions,
-          const {},
-        ),
-      );
+      ..extensions.set<OmemoData>(OmemoData(result.newSessions, const {}));
   }
 
   Future<Result<OmemoError, XMLNode>> _retrieveDeviceListPayload(
@@ -564,13 +524,11 @@ class OmemoManager extends XmppManagerBase {
       deviceList = deviceListRaw.get<XMLNode>();
     }
 
-    deviceList ??= XMLNode.xmlns(
-      tag: 'devices',
-      xmlns: omemoDevicesXmlns,
-    );
+    deviceList ??= XMLNode.xmlns(tag: 'devices', xmlns: omemoDevicesXmlns);
 
-    final ids = deviceList.children
-        .map((child) => int.parse(child.attributes['id']! as String));
+    final ids = deviceList.children.map(
+      (child) => int.parse(child.attributes['id']! as String),
+    );
 
     if (!ids.contains(bundle.deviceId)) {
       final newDeviceList = XMLNode.xmlns(
@@ -580,9 +538,7 @@ class OmemoManager extends XmppManagerBase {
           ...deviceList.children,
           XMLNode(
             tag: 'device',
-            attributes: <String, String>{
-              'id': '${bundle.deviceId}',
-            },
+            attributes: <String, String>{'id': '${bundle.deviceId}'},
           ),
         ],
       );
@@ -592,9 +548,7 @@ class OmemoManager extends XmppManagerBase {
         omemoDevicesXmlns,
         newDeviceList,
         id: 'current',
-        options: const PubSubPublishOptions(
-          accessModel: 'open',
-        ),
+        options: const PubSubPublishOptions(accessModel: 'open'),
       );
       if (deviceListPublish.isType<PubSubError>()) return const Result(false);
     }
@@ -604,10 +558,7 @@ class OmemoManager extends XmppManagerBase {
       omemoBundlesXmlns,
       axolotlBundleToXML(bundle),
       id: '${bundle.deviceId}',
-      options: const PubSubPublishOptions(
-        accessModel: 'open',
-        maxItems: 'max',
-      ),
+      options: const PubSubPublishOptions(accessModel: 'open', maxItems: 'max'),
     );
 
     return Result(deviceBundlePublish.isType<PubSubError>());
@@ -631,7 +582,8 @@ class OmemoManager extends XmppManagerBase {
     if (items.isType<DiscoError>()) return Result(UnknownOmemoError());
 
     final nodes = items.get<List<DiscoItem>>();
-    final result = nodes.any((item) => item.node == omemoDevicesXmlns) &&
+    final result =
+        nodes.any((item) => item.node == omemoDevicesXmlns) &&
         nodes.any((item) => item.node == omemoBundlesXmlns);
     return Result(result);
   }
@@ -663,9 +615,7 @@ class OmemoManager extends XmppManagerBase {
       omemoDevicesXmlns,
       newPayload,
       id: 'current',
-      options: const PubSubPublishOptions(
-        accessModel: 'open',
-      ),
+      options: const PubSubPublishOptions(accessModel: 'open'),
     );
 
     if (publishResult.isType<PubSubError>()) return Result(UnknownOmemoError());

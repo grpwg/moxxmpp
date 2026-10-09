@@ -16,19 +16,19 @@ class BlockingManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'iq',
-          tagName: 'unblock',
-          tagXmlns: blockingXmlns,
-          callback: _unblockPush,
-        ),
-        StanzaHandler(
-          stanzaTag: 'iq',
-          tagName: 'block',
-          tagXmlns: blockingXmlns,
-          callback: _blockPush,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'iq',
+      tagName: 'unblock',
+      tagXmlns: blockingXmlns,
+      callback: _unblockPush,
+    ),
+    StanzaHandler(
+      stanzaTag: 'iq',
+      tagName: 'block',
+      tagXmlns: blockingXmlns,
+      callback: _blockPush,
+    ),
+  ];
 
   @override
   Future<bool> isSupported() async {
@@ -87,9 +87,7 @@ class BlockingManager extends XmppManagerBase {
         ),
       );
     } else {
-      getAttributes().sendEvent(
-        BlocklistUnblockAllPushEvent(),
-      );
+      getAttributes().sendEvent(BlocklistUnblockAllPushEvent());
     }
 
     return state..done = true;
@@ -105,12 +103,7 @@ class BlockingManager extends XmppManagerBase {
               tag: 'block',
               xmlns: blockingXmlns,
               children: items.map((item) {
-                return XMLNode(
-                  tag: 'item',
-                  attributes: {
-                    'jid': item,
-                  },
-                );
+                return XMLNode(tag: 'item', attributes: {'jid': item});
               }).toList(),
             ),
           ],
@@ -126,12 +119,7 @@ class BlockingManager extends XmppManagerBase {
       StanzaDetails(
         Stanza.iq(
           type: 'set',
-          children: [
-            XMLNode.xmlns(
-              tag: 'unblock',
-              xmlns: blockingXmlns,
-            ),
-          ],
+          children: [XMLNode.xmlns(tag: 'unblock', xmlns: blockingXmlns)],
         ),
       ),
     ))!;
@@ -152,12 +140,7 @@ class BlockingManager extends XmppManagerBase {
               xmlns: blockingXmlns,
               children: items
                   .map(
-                    (item) => XMLNode(
-                      tag: 'item',
-                      attributes: {
-                        'jid': item,
-                      },
-                    ),
+                    (item) => XMLNode(tag: 'item', attributes: {'jid': item}),
                   )
                   .toList(),
             ),
@@ -174,12 +157,7 @@ class BlockingManager extends XmppManagerBase {
       StanzaDetails(
         Stanza.iq(
           type: 'get',
-          children: [
-            XMLNode.xmlns(
-              tag: 'blocklist',
-              xmlns: blockingXmlns,
-            ),
-          ],
+          children: [XMLNode.xmlns(tag: 'blocklist', xmlns: blockingXmlns)],
         ),
       ),
     ))!;

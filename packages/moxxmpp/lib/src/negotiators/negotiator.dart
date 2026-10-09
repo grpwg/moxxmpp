@@ -56,7 +56,7 @@ class NegotiatorAttributes {
 
   /// Returns the negotiator with id id of the connection or null.
   final T? Function<T extends XmppFeatureNegotiatorBase>(String)
-      getNegotiatorById;
+  getNegotiatorById;
 
   /// Returns the manager with id id of the connection or null.
   final T? Function<T extends XmppManagerBase>(String) getManagerById;

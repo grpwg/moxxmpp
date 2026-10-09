@@ -18,9 +18,7 @@ class LastMessageCorrectionData implements StanzaHandlerExtension {
     return XMLNode.xmlns(
       tag: 'replace',
       xmlns: lmcXmlns,
-      attributes: {
-        'id': id,
-      },
+      attributes: {'id': id},
     );
   }
 }
@@ -33,15 +31,15 @@ class LastMessageCorrectionManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'message',
-          tagName: 'replace',
-          tagXmlns: lmcXmlns,
-          callback: _onMessage,
-          // Before the message handler
-          priority: -99,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'message',
+      tagName: 'replace',
+      tagXmlns: lmcXmlns,
+      callback: _onMessage,
+      // Before the message handler
+      priority: -99,
+    ),
+  ];
 
   @override
   Future<bool> isSupported() async => true;
@@ -61,11 +59,7 @@ class LastMessageCorrectionManager extends XmppManagerBase {
     TypedMap<StanzaHandlerExtension> extensions,
   ) {
     final data = extensions.get<LastMessageCorrectionData>();
-    return data != null
-        ? [
-            data.toXML(),
-          ]
-        : [];
+    return data != null ? [data.toXML()] : [];
   }
 
   @override

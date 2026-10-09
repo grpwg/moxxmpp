@@ -19,17 +19,18 @@ bool compareXMLNodes(
   final actualAttributeLength = !ignoreId
       ? actual.attributes.length
       : (actual.attributes.containsKey('id')
-          ? actual.attributes.length - 1
-          : actual.attributes.length);
+            ? actual.attributes.length - 1
+            : actual.attributes.length);
   final expectedAttributeLength = !ignoreId
       ? expectation.attributes.length
       : (expectation.attributes.containsKey('id')
-          ? expectation.attributes.length - 1
-          : expectation.attributes.length);
+            ? expectation.attributes.length - 1
+            : expectation.attributes.length);
   if (actualAttributeLength != expectedAttributeLength) return false;
 
   if (expectation.innerText() != '' &&
-      actual.innerText() != expectation.innerText()) return false;
+      actual.innerText() != expectation.innerText())
+    return false;
 
   return expectation.children.every((childe) {
     return actual.children.any((childa) => compareXMLNodes(childa, childe));

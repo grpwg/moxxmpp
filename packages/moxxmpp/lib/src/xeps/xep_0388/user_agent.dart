@@ -2,11 +2,7 @@ import 'package:moxxmpp/src/stringxml.dart';
 
 /// A data class describing the user agent. See https://xmpp.org/extensions/xep-0388.html#initiation.
 class UserAgent {
-  const UserAgent({
-    this.id,
-    this.software,
-    this.device,
-  });
+  const UserAgent({this.id, this.software, this.device});
 
   /// The identifier of the software/device combo connecting. SHOULD be a UUIDv4.
   final String? id;
@@ -24,20 +20,10 @@ class UserAgent {
     );
     return XMLNode(
       tag: 'user-agent',
-      attributes: {
-        if (id != null) 'id': id,
-      },
+      attributes: {if (id != null) 'id': id},
       children: [
-        if (software != null)
-          XMLNode(
-            tag: 'software',
-            text: software,
-          ),
-        if (device != null)
-          XMLNode(
-            tag: 'device',
-            text: device,
-          ),
+        if (software != null) XMLNode(tag: 'software', text: software),
+        if (device != null) XMLNode(tag: 'device', text: device),
       ],
     );
   }

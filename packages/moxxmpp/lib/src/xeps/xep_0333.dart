@@ -42,10 +42,7 @@ enum ChatMarker {
         break;
     }
 
-    return XMLNode.xmlns(
-      tag: tag,
-      xmlns: chatMarkersXmlns,
-    );
+    return XMLNode.xmlns(tag: tag, xmlns: chatMarkersXmlns);
   }
 }
 
@@ -58,10 +55,7 @@ class MarkableData implements StanzaHandlerExtension {
   XMLNode toXML() {
     assert(isMarkable, '');
 
-    return XMLNode.xmlns(
-      tag: 'markable',
-      xmlns: chatMarkersXmlns,
-    );
+    return XMLNode.xmlns(tag: 'markable', xmlns: chatMarkersXmlns);
   }
 }
 
@@ -79,9 +73,7 @@ class ChatMarkerData implements StanzaHandlerExtension {
     return XMLNode.xmlns(
       tag: tag.tag,
       xmlns: chatMarkersXmlns,
-      attributes: {
-        'id': id,
-      },
+      attributes: {'id': id},
     );
   }
 }
@@ -94,14 +86,14 @@ class ChatMarkerManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'message',
-          tagXmlns: chatMarkersXmlns,
-          callback: _onMessage,
-          // Before the message handler
-          priority: -99,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'message',
+      tagXmlns: chatMarkersXmlns,
+      callback: _onMessage,
+      // Before the message handler
+      priority: -99,
+    ),
+  ];
 
   @override
   Future<bool> isSupported() async => true;

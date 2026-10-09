@@ -25,10 +25,7 @@ class InvalidateFASTTokenEvent extends XmppEvent {
 
 /// The description of a token for FAST authentication.
 class FASTToken {
-  const FASTToken(
-    this.token,
-    this.expiry,
-  );
+  const FASTToken(this.token, this.expiry);
 
   factory FASTToken.fromXml(XMLNode token) {
     assert(
@@ -104,9 +101,7 @@ class FASTSaslNegotiator extends Sasl2AuthenticationNegotiator {
     if (tokenElement != null) {
       final token = FASTToken.fromXml(tokenElement);
       fastToken = token.token;
-      await attributes.sendEvent(
-        NewFASTTokenReceivedEvent(token),
-      );
+      await attributes.sendEvent(NewFASTTokenReceivedEvent(token));
     }
 
     state = NegotiatorState.done;
@@ -116,9 +111,7 @@ class FASTSaslNegotiator extends Sasl2AuthenticationNegotiator {
   @override
   Future<void> onSasl2Failure(XMLNode response) async {
     fastToken = null;
-    await attributes.sendEvent(
-      InvalidateFASTTokenEvent(),
-    );
+    await attributes.sendEvent(InvalidateFASTTokenEvent());
   }
 
   @override
@@ -130,10 +123,7 @@ class FASTSaslNegotiator extends Sasl2AuthenticationNegotiator {
       // Specify that we are using a token
       return [
         // As we don't do TLS 0-RTT, we don't have to specify `count`.
-        XMLNode.xmlns(
-          tag: 'fast',
-          xmlns: fastXmlns,
-        ),
+        XMLNode.xmlns(tag: 'fast', xmlns: fastXmlns),
       ];
     }
 
@@ -144,9 +134,7 @@ class FASTSaslNegotiator extends Sasl2AuthenticationNegotiator {
         XMLNode.xmlns(
           tag: 'request-token',
           xmlns: fastXmlns,
-          attributes: {
-            'mechanism': 'HT-SHA-256-NONE',
-          },
+          attributes: {'mechanism': 'HT-SHA-256-NONE'},
         ),
       ];
     } else {

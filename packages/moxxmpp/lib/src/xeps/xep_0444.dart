@@ -17,14 +17,9 @@ class MessageReactionsData implements StanzaHandlerExtension {
     return XMLNode.xmlns(
       tag: 'reactions',
       xmlns: messageReactionsXmlns,
-      attributes: <String, String>{
-        'id': messageId,
-      },
+      attributes: <String, String>{'id': messageId},
       children: emojis.map((emoji) {
-        return XMLNode(
-          tag: 'reaction',
-          text: emoji,
-        );
+        return XMLNode(tag: 'reaction', text: emoji);
       }).toList(),
     );
   }
@@ -38,15 +33,15 @@ class MessageReactionsManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'message',
-          tagName: 'reactions',
-          tagXmlns: messageReactionsXmlns,
-          callback: _onReactionsReceived,
-          // Before the message handler
-          priority: -99,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'message',
+      tagName: 'reactions',
+      tagXmlns: messageReactionsXmlns,
+      callback: _onReactionsReceived,
+      // Before the message handler
+      priority: -99,
+    ),
+  ];
 
   @override
   Future<bool> isSupported() async => true;
@@ -55,8 +50,10 @@ class MessageReactionsManager extends XmppManagerBase {
     Stanza message,
     StanzaHandlerData state,
   ) async {
-    final reactionsElement =
-        message.firstTag('reactions', xmlns: messageReactionsXmlns)!;
+    final reactionsElement = message.firstTag(
+      'reactions',
+      xmlns: messageReactionsXmlns,
+    )!;
     return state
       ..extensions.set(
         MessageReactionsData(
@@ -73,11 +70,7 @@ class MessageReactionsManager extends XmppManagerBase {
     TypedMap<StanzaHandlerExtension> extensions,
   ) {
     final data = extensions.get<MessageReactionsData>();
-    return data != null
-        ? [
-            data.toXML(),
-          ]
-        : [];
+    return data != null ? [data.toXML()] : [];
   }
 
   @override

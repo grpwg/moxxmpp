@@ -112,10 +112,7 @@ class StubTCPSocket extends BaseSocketWrapper {
   StubTCPSocket.authenticated(
     ConnectionSettings settings,
     List<ExpectationBase> play,
-  ) : _play = [
-          ...buildAuthenticatedPlay(settings),
-          ...play,
-        ];
+  ) : _play = [...buildAuthenticatedPlay(settings), ...play];
 
   int _state = 0;
   final StreamController<String> _dataStream =

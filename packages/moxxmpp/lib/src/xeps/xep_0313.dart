@@ -70,14 +70,14 @@ class MessageArchiveManagementManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'message',
-          tagName: 'result',
-          tagXmlns: mamXmlns,
-          callback: _onMAMMessage,
-          priority: -98,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'message',
+      tagName: 'result',
+      tagXmlns: mamXmlns,
+      callback: _onMAMMessage,
+      priority: -98,
+    ),
+  ];
 
   Future<StanzaHandlerData> _onMAMMessage(
     Stanza stanza,
@@ -113,17 +113,16 @@ class MessageArchiveManagementManager extends XmppManagerBase {
       false,
       false,
       Stanza.fromXMLNode(message),
-      data.extensions
-        ..set(
-          MAMData(
-            qid,
-            DelayedDeliveryData(
-              jid,
-              DateTime.parse(delay.attributes['stamp']! as String),
-            ),
-            archiveId: archiveId,
+      data.extensions..set(
+        MAMData(
+          qid,
+          DelayedDeliveryData(
+            jid,
+            DateTime.parse(delay.attributes['stamp']! as String),
           ),
+          archiveId: archiveId,
         ),
+      ),
     );
   }
 
@@ -229,21 +228,9 @@ class MessageArchiveManagementManager extends XmppManagerBase {
         : null;
 
     final rsmChildren = <XMLNode>[
-      if (pageSize != null)
-        XMLNode(
-          tag: 'max',
-          text: pageSize.toString(),
-        ),
-      if (rsmAfter != null)
-        XMLNode(
-          tag: 'after',
-          text: rsmAfter,
-        ),
-      if (rsmBefore != null)
-        XMLNode(
-          tag: 'before',
-          text: rsmBefore,
-        ),
+      if (pageSize != null) XMLNode(tag: 'max', text: pageSize.toString()),
+      if (rsmAfter != null) XMLNode(tag: 'after', text: rsmAfter),
+      if (rsmBefore != null) XMLNode(tag: 'before', text: rsmBefore),
     ];
 
     final request = Stanza.iq(
@@ -253,26 +240,17 @@ class MessageArchiveManagementManager extends XmppManagerBase {
         XMLNode.xmlns(
           tag: 'query',
           xmlns: mamXmlns,
-          attributes: {
-            'queryid': uuid,
-          },
+          attributes: {'queryid': uuid},
           children: [
             if (dataForm != null) dataForm.toXml(),
             if (rsmChildren.isNotEmpty)
-              XMLNode.xmlns(
-                tag: 'set',
-                xmlns: rsmXmlns,
-                children: rsmChildren,
-              ),
+              XMLNode.xmlns(tag: 'set', xmlns: rsmXmlns, children: rsmChildren),
           ],
         ),
       ],
     );
     final result = await getAttributes().sendStanza(
-      StanzaDetails(
-        request,
-        responseBypassesQueue: false,
-      ),
+      StanzaDetails(request, responseBypassesQueue: false),
     );
 
     // Remove the pending query key.
@@ -285,7 +263,8 @@ class MessageArchiveManagementManager extends XmppManagerBase {
     }
 
     final fin = result.firstTag('fin', xmlns: mamXmlns);
-    final complete = fin?.attributes['complete'] == 'true' ||
+    final complete =
+        fin?.attributes['complete'] == 'true' ||
         // Some servers omit complete when the page is the last one and
         // returned fewer than max; treat an empty page as done.
         messageCount == 0;

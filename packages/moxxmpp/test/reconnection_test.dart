@@ -7,38 +7,24 @@ void main() {
   initLogger();
 
   test('Test triggering a reconnect multiple times', () async {
-    final policy = RandomBackoffReconnectionPolicy(
-      9998,
-      9999,
-    );
+    final policy = RandomBackoffReconnectionPolicy(9998, 9999);
     await policy.setShouldReconnect(true);
 
     // We have a failure
-    expect(
-      await policy.canTriggerFailure(),
-      true,
-    );
+    expect(await policy.canTriggerFailure(), true);
     await policy.onFailure();
 
     // Try to trigger another one
-    expect(
-      await policy.canTriggerFailure(),
-      false,
-    );
+    expect(await policy.canTriggerFailure(), false);
   });
 
   test('Test resetting while reconnecting', () async {
-    final policy = RandomBackoffReconnectionPolicy(
-      9998,
-      9999,
-    )..register(() async => expect(true, false));
+    final policy = RandomBackoffReconnectionPolicy(9998, 9999)
+      ..register(() async => expect(true, false));
     await policy.setShouldReconnect(true);
 
     // We have a failure
-    expect(
-      await policy.canTriggerFailure(),
-      true,
-    );
+    expect(await policy.canTriggerFailure(), true);
     await policy.onFailure();
     expect(policy.isTimerRunning(), true);
 
@@ -47,17 +33,11 @@ void main() {
     expect(policy.isTimerRunning(), false);
 
     // We have another failure
-    expect(
-      await policy.canTriggerFailure(),
-      true,
-    );
+    expect(await policy.canTriggerFailure(), true);
   });
 
   test('Test triggering the timer callback twice', () async {
-    final policy = RandomBackoffReconnectionPolicy(
-      9998,
-      9999,
-    );
+    final policy = RandomBackoffReconnectionPolicy(9998, 9999);
     var counter = 0;
     policy.register(() async {
       await policy.reset();
@@ -68,10 +48,7 @@ void main() {
     print('policy.setShouldReconnect(true) done');
 
     // We have a failure
-    expect(
-      await policy.canTriggerFailure(),
-      true,
-    );
+    expect(await policy.canTriggerFailure(), true);
     await policy.onFailure();
     // ignore: avoid_print
     print('policy.onFailure() done');

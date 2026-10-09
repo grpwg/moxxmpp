@@ -21,10 +21,7 @@ class MessageDeliveryReceiptData implements StanzaHandlerExtension {
       receiptRequested,
       'This method makes little sense with receiptRequested == false',
     );
-    return XMLNode.xmlns(
-      tag: 'request',
-      xmlns: deliveryXmlns,
-    );
+    return XMLNode.xmlns(tag: 'request', xmlns: deliveryXmlns);
   }
 }
 
@@ -51,23 +48,23 @@ class MessageDeliveryReceiptManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'message',
-          tagName: 'received',
-          tagXmlns: deliveryXmlns,
-          callback: _onDeliveryReceiptReceived,
-          // Before the message handler
-          priority: -99,
-        ),
-        StanzaHandler(
-          stanzaTag: 'message',
-          tagName: 'request',
-          tagXmlns: deliveryXmlns,
-          callback: _onDeliveryRequestReceived,
-          // Before the message handler
-          priority: -99,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'message',
+      tagName: 'received',
+      tagXmlns: deliveryXmlns,
+      callback: _onDeliveryReceiptReceived,
+      // Before the message handler
+      priority: -99,
+    ),
+    StanzaHandler(
+      stanzaTag: 'message',
+      tagName: 'request',
+      tagXmlns: deliveryXmlns,
+      callback: _onDeliveryRequestReceived,
+      // Before the message handler
+      priority: -99,
+    ),
+  ];
 
   @override
   Future<bool> isSupported() async => true;

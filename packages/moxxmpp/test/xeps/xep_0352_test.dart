@@ -37,15 +37,15 @@ void main() {
       CSIManager()
         ..register(
           XmppManagerAttributes(
-            sendStanza: (
-              _, {
-              bool addId = true,
-              bool retransmitted = false,
-              bool awaitable = true,
-              bool encrypted = false,
-              bool forceEncryption = false,
-            }) async =>
-                XMLNode(tag: 'hallo'),
+            sendStanza:
+                (
+                  _, {
+                  bool addId = true,
+                  bool retransmitted = false,
+                  bool awaitable = true,
+                  bool encrypted = false,
+                  bool forceEncryption = false,
+                }) async => XMLNode(tag: 'hallo'),
             sendEvent: (event) {},
             sendNonza: (nonza) {
               nonzaSent = true;
@@ -75,15 +75,15 @@ void main() {
       CSIManager()
         ..register(
           XmppManagerAttributes(
-            sendStanza: (
-              _, {
-              bool addId = true,
-              bool retransmitted = false,
-              bool awaitable = true,
-              bool encrypted = false,
-              bool forceEncryption = false,
-            }) async =>
-                XMLNode(tag: 'hallo'),
+            sendStanza:
+                (
+                  _, {
+                  bool addId = true,
+                  bool retransmitted = false,
+                  bool awaitable = true,
+                  bool encrypted = false,
+                  bool forceEncryption = false,
+                }) async => XMLNode(tag: 'hallo'),
             sendEvent: (event) {},
             sendNonza: (nonza) {
               expect(
@@ -162,15 +162,17 @@ void main() {
         ''',
       ),
     ]);
-    final conn = XmppConnection(
-      TestingReconnectionPolicy(),
-      AlwaysConnectedConnectivityManager(),
-      ClientToServerNegotiator(),
-      fakeSocket,
-    )..connectionSettings = ConnectionSettings(
-        jid: JID.fromString('polynomdivision@test.server'),
-        password: 'aaaa',
-      );
+    final conn =
+        XmppConnection(
+            TestingReconnectionPolicy(),
+            AlwaysConnectedConnectivityManager(),
+            ClientToServerNegotiator(),
+            fakeSocket,
+          )
+          ..connectionSettings = ConnectionSettings(
+            jid: JID.fromString('polynomdivision@test.server'),
+            password: 'aaaa',
+          );
     final csi = CSIManager();
     await csi.setInactive(sendNonza: false);
     await conn.registerManagers([

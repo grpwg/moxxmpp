@@ -92,14 +92,14 @@ class EmeManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          tagName: 'encryption',
-          tagXmlns: emeXmlns,
-          callback: _onStanzaReceived,
-          // Before the message handler
-          priority: -99,
-        ),
-      ];
+    StanzaHandler(
+      tagName: 'encryption',
+      tagXmlns: emeXmlns,
+      callback: _onStanzaReceived,
+      // Before the message handler
+      priority: -99,
+    ),
+  ];
 
   Future<StanzaHandlerData> _onStanzaReceived(
     Stanza message,

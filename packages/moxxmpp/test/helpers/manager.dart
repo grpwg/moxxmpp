@@ -15,9 +15,8 @@ import '../helpers/xmpp.dart';
 
 /// This class allows registering managers for easier testing.
 class TestingManagerHolder {
-  TestingManagerHolder({
-    StubTCPSocket? stubSocket,
-  }) : socket = stubSocket ?? StubTCPSocket([]);
+  TestingManagerHolder({StubTCPSocket? stubSocket})
+    : socket = stubSocket ?? StubTCPSocket([]);
 
   final StubTCPSocket socket;
 

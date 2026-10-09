@@ -53,12 +53,7 @@ Future<String> calculateCapabilityHash(
       buffer.write('${ext.getFieldByVar("FORM_TYPE")!.values.first}<');
 
       final sortedFields = ext.fields
-        ..sort(
-          (a, b) => ioctetSortComparator(
-            a.varAttr!,
-            b.varAttr!,
-          ),
-        );
+        ..sort((a, b) => ioctetSortComparator(a.varAttr!, b.varAttr!));
 
       for (final field in sortedFields) {
         if (field.varAttr == 'FORM_TYPE') continue;
@@ -85,7 +80,7 @@ Future<String> calculateCapabilityHash(
 /// NOTE: This manager requires that the DiscoManager is also registered.
 class EntityCapabilitiesManager extends XmppManagerBase {
   EntityCapabilitiesManager(this._capabilityHashBase)
-      : super(entityCapabilitiesManager);
+    : super(entityCapabilitiesManager);
 
   /// The string that is both the node under which we advertise the disco info
   /// and the base for the actual node on which we respond to disco#info requests.
@@ -107,20 +102,18 @@ class EntityCapabilitiesManager extends XmppManagerBase {
   Future<bool> isSupported() async => true;
 
   @override
-  List<String> getDiscoFeatures() => [
-        capsXmlns,
-      ];
+  List<String> getDiscoFeatures() => [capsXmlns];
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'presence',
-          tagName: 'c',
-          tagXmlns: capsXmlns,
-          callback: onPresence,
-          priority: PresenceManager.presenceHandlerPriority + 1,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'presence',
+      tagName: 'c',
+      tagXmlns: capsXmlns,
+      callback: onPresence,
+      priority: PresenceManager.presenceHandlerPriority + 1,
+    ),
+  ];
 
   /// Computes, if required, the capability hash of the data provided by
   /// the DiscoManager.
@@ -181,10 +174,7 @@ class EntityCapabilitiesManager extends XmppManagerBase {
     JID from,
   ) async {
     final dm = getAttributes().getManagerById<DiscoManager>(discoManager)!;
-    final discoRequest = await dm.discoInfoQuery(
-      from,
-      node: capabilityNode,
-    );
+    final discoRequest = await dm.discoInfoQuery(from, node: capabilityNode);
     if (discoRequest.isType<StanzaError>()) {
       return;
     }
@@ -194,10 +184,7 @@ class EntityCapabilitiesManager extends XmppManagerBase {
     if (hashFunction == null) {
       await dm.addCachedDiscoInfo(
         MapEntry<DiscoCacheKey, DiscoInfo>(
-          DiscoCacheKey(
-            from,
-            null,
-          ),
+          DiscoCacheKey(from, null),
           discoInfo,
         ),
       );
@@ -209,8 +196,9 @@ class EntityCapabilitiesManager extends XmppManagerBase {
     // > same category/type/lang/name, consider the entire response to be ill-formed.
     for (final identity in discoInfo.identities) {
       final identityString = _identityString(identity);
-      if (discoInfo.identities
-              .count((i) => _identityString(i) == identityString) >
+      if (discoInfo.identities.count(
+            (i) => _identityString(i) == identityString,
+          ) >
           1) {
         logger.warning(
           'Malformed disco#info response: More than one equal identity',
@@ -328,20 +316,15 @@ class EntityCapabilitiesManager extends XmppManagerBase {
     }
 
     // Check if we know of the hash
-    final isCached =
-        await _cacheLock.synchronized(() => _capHashCache.containsKey(ver));
+    final isCached = await _cacheLock.synchronized(
+      () => _capHashCache.containsKey(ver),
+    );
     if (isCached) {
       return state;
     }
 
     unawaited(
-      _performQuery(
-        stanza,
-        ver,
-        hashFunctionName,
-        capabilityNode,
-        from,
-      ),
+      _performQuery(stanza, ver, hashFunctionName, capabilityNode, from),
     );
     return state;
   }
@@ -366,15 +349,10 @@ class EntityCapabilitiesManager extends XmppManagerBase {
 
     getAttributes()
         .getManagerById<DiscoManager>(discoManager)
-        ?.registerInfoCallback(
-          await _getNode(),
-          _onInfoQuery,
-        );
+        ?.registerInfoCallback(await _getNode(), _onInfoQuery);
 
     getAttributes()
         .getManagerById<PresenceManager>(presenceManager)
-        ?.registerPreSendCallback(
-          _prePresenceSent,
-        );
+        ?.registerPreSendCallback(_prePresenceSent);
   }
 }

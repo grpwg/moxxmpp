@@ -26,13 +26,13 @@ class MessageRetractionManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'message',
-          callback: _onMessage,
-          // Before the MessageManager
-          priority: -99,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'message',
+      callback: _onMessage,
+      // Before the MessageManager
+      priority: -99,
+    ),
+  ];
 
   @override
   Future<bool> isSupported() async => true;
@@ -72,26 +72,15 @@ class MessageRetractionManager extends XmppManagerBase {
             XMLNode.xmlns(
               tag: 'apply-to',
               xmlns: fasteningXmlns,
-              attributes: <String, String>{
-                'id': data.id,
-              },
+              attributes: <String, String>{'id': data.id},
               children: [
-                XMLNode.xmlns(
-                  tag: 'retract',
-                  xmlns: messageRetractionXmlns,
-                ),
+                XMLNode.xmlns(tag: 'retract', xmlns: messageRetractionXmlns),
               ],
             ),
             if (data.fallback != null)
-              XMLNode(
-                tag: 'body',
-                text: data.fallback,
-              ),
+              XMLNode(tag: 'body', text: data.fallback),
             if (data.fallback != null)
-              XMLNode.xmlns(
-                tag: 'fallback',
-                xmlns: fallbackIndicationXmlns,
-              ),
+              XMLNode.xmlns(tag: 'fallback', xmlns: fallbackIndicationXmlns),
           ]
         : [];
   }

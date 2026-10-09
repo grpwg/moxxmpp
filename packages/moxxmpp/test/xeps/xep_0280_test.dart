@@ -6,47 +6,46 @@ import '../helpers/xmpp.dart';
 void main() {
   initLogger();
 
-  test("Test if we're vulnerable against CVE-2020-26547 style vulnerabilities",
-      () async {
-    final attributes = XmppManagerAttributes(
-      sendStanza: (StanzaDetails details) async {
-        // ignore: avoid_print
-        print('==> ${details.stanza.toXml()}');
-        return XMLNode(tag: 'iq', attributes: {'type': 'result'});
-      },
-      sendNonza: (nonza) {},
-      sendEvent: (event) {},
-      getManagerById: getManagerNullStub,
-      getConnectionSettings: () => ConnectionSettings(
-        jid: JID.fromString('bob@xmpp.example'),
-        password: 'password',
-      ),
-      getFullJID: () => JID.fromString('bob@xmpp.example/uwu'),
-      getSocket: () => StubTCPSocket([]),
-      getConnection: () => XmppConnection(
-        TestingReconnectionPolicy(),
-        AlwaysConnectedConnectivityManager(),
-        ClientToServerNegotiator(),
-        StubTCPSocket([]),
-      ),
-      getNegotiatorById: getNegotiatorNullStub,
-    );
-    final manager = CarbonsManager()..register(attributes);
-    await manager.enableCarbons();
+  test(
+    "Test if we're vulnerable against CVE-2020-26547 style vulnerabilities",
+    () async {
+      final attributes = XmppManagerAttributes(
+        sendStanza: (StanzaDetails details) async {
+          // ignore: avoid_print
+          print('==> ${details.stanza.toXml()}');
+          return XMLNode(tag: 'iq', attributes: {'type': 'result'});
+        },
+        sendNonza: (nonza) {},
+        sendEvent: (event) {},
+        getManagerById: getManagerNullStub,
+        getConnectionSettings: () => ConnectionSettings(
+          jid: JID.fromString('bob@xmpp.example'),
+          password: 'password',
+        ),
+        getFullJID: () => JID.fromString('bob@xmpp.example/uwu'),
+        getSocket: () => StubTCPSocket([]),
+        getConnection: () => XmppConnection(
+          TestingReconnectionPolicy(),
+          AlwaysConnectedConnectivityManager(),
+          ClientToServerNegotiator(),
+          StubTCPSocket([]),
+        ),
+        getNegotiatorById: getNegotiatorNullStub,
+      );
+      final manager = CarbonsManager()..register(attributes);
+      await manager.enableCarbons();
 
-    expect(
-      manager.isCarbonValid(JID.fromString('mallory@evil.example')),
-      false,
-    );
-    expect(
-      manager.isCarbonValid(JID.fromString('bob@xmpp.example')),
-      true,
-    );
-    expect(
-      manager.isCarbonValid(JID.fromString('bob@xmpp.example/abc')),
-      false,
-    );
-  });
+      expect(
+        manager.isCarbonValid(JID.fromString('mallory@evil.example')),
+        false,
+      );
+      expect(manager.isCarbonValid(JID.fromString('bob@xmpp.example')), true);
+      expect(
+        manager.isCarbonValid(JID.fromString('bob@xmpp.example/abc')),
+        false,
+      );
+    },
+  );
 
   test('Test enabling message carbons inline with Bind2', () async {
     final fakeSocket = StubTCPSocket([
@@ -92,17 +91,18 @@ void main() {
         ''',
       ),
     ]);
-    final conn = XmppConnection(
-      TestingReconnectionPolicy(),
-      AlwaysConnectedConnectivityManager(),
-      ClientToServerNegotiator(),
-      fakeSocket,
-    )
-      ..connectionSettings = ConnectionSettings(
-        jid: JID.fromString('polynomdivision@test.server'),
-        password: 'aaaa',
-      )
-      ..setResource('test-resource', triggerEvent: false);
+    final conn =
+        XmppConnection(
+            TestingReconnectionPolicy(),
+            AlwaysConnectedConnectivityManager(),
+            ClientToServerNegotiator(),
+            fakeSocket,
+          )
+          ..connectionSettings = ConnectionSettings(
+            jid: JID.fromString('polynomdivision@test.server'),
+            password: 'aaaa',
+          )
+          ..setResource('test-resource', triggerEvent: false);
     await conn.registerManagers([
       RosterManager(TestingRosterStateManager('', [])),
       DiscoManager([]),

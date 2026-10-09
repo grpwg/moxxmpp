@@ -6,15 +6,21 @@ import 'helpers/xml.dart';
 void main() {
   test('Test stringxml', () {
     final child = XMLNode(tag: 'uwu', attributes: {'strength': 10});
-    final stanza =
-        XMLNode.xmlns(tag: 'uwu-meter', xmlns: 'uwu', children: [child]);
+    final stanza = XMLNode.xmlns(
+      tag: 'uwu-meter',
+      xmlns: 'uwu',
+      children: [child],
+    );
     expect(
       XMLNode(tag: 'iq', attributes: {'xmlns': 'uwu'}).toXml(),
       "<iq xmlns='uwu' />",
     );
     expect(
-      XMLNode.xmlns(tag: 'iq', xmlns: 'uwu', attributes: {'how': 'uwu'})
-          .toXml(),
+      XMLNode.xmlns(
+        tag: 'iq',
+        xmlns: 'uwu',
+        attributes: {'how': 'uwu'},
+      ).toXml(),
       "<iq xmlns='uwu' how='uwu' />",
     );
     expect(
@@ -76,8 +82,7 @@ void main() {
   });
 
   test('Test compareXMLNodes', () {
-    final node1 = XMLNode.fromString(
-      '''
+    final node1 = XMLNode.fromString('''
  <iq type='set' id='0327c373-2e34-46bd-ab7f-1274a6f7095f' to='pubsub.server.example.org' from='testuser@example.org/MU29eEZn' xmlns='jabber:client'>
   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
     <publish node='princely_musings'>
@@ -97,8 +102,7 @@ void main() {
     </publish-options>
   </pubsub>
 </iq>
-''',
-    );
+''');
     final node2 = XMLNode.fromString('''
 <iq type="set" to="pubsub.server.example.org" id="a">
   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
@@ -121,12 +125,6 @@ void main() {
 </iq>
 ''');
 
-    expect(
-      compareXMLNodes(
-        node1,
-        node2,
-      ),
-      false,
-    );
+    expect(compareXMLNodes(node1, node2), false);
   });
 }

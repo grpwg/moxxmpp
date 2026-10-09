@@ -16,19 +16,13 @@ void main() {
 </XRD>
 ''';
       final alt = parseHostMetaXrd(xrd);
-      expect(
-        alt.websocketUrls,
-        [
-          'wss://example.org:443/xmpp-websocket',
-          'ws://insecure.example.org/xmpp-websocket',
-        ],
-      );
+      expect(alt.websocketUrls, [
+        'wss://example.org:443/xmpp-websocket',
+        'ws://insecure.example.org/xmpp-websocket',
+      ]);
       expect(alt.boshUrls, ['https://example.org/http-bind']);
       // Prefer last wss: (converse.js .pop() on filtered wss list).
-      expect(
-        alt.preferredWebsocketUrl,
-        'wss://example.org:443/xmpp-websocket',
-      );
+      expect(alt.preferredWebsocketUrl, 'wss://example.org:443/xmpp-websocket');
     });
 
     test('rejects wrong root', () {

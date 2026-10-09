@@ -79,9 +79,7 @@ class UserAvatarManager extends XmppManagerBase {
       getAttributes().getManagerById(pubsubManager)! as PubSubManager;
 
   @override
-  List<String> getDiscoFeatures() => [
-        '$userAvatarMetadataXmlns+notify',
-      ];
+  List<String> getDiscoFeatures() => ['$userAvatarMetadataXmlns+notify'];
 
   @override
   Future<void> onXmppEvent(XmppEvent event) async {
@@ -123,12 +121,7 @@ class UserAvatarManager extends XmppManagerBase {
     if (resultRaw.isType<PubSubError>()) return Result(UnknownAvatarError());
 
     final result = resultRaw.get<PubSubItem>();
-    return Result(
-      UserAvatarData(
-        result.payload.innerText(),
-        id,
-      ),
-    );
+    return Result(UserAvatarData(result.payload.innerText(), id));
   }
 
   /// Attempts to fetch the latest item from the User Avatar metadata node. Returns the list of
@@ -138,8 +131,11 @@ class UserAvatarManager extends XmppManagerBase {
   Future<Result<AvatarError, List<UserAvatarMetadata>>> getLatestMetadata(
     JID jid,
   ) async {
-    final resultsRaw = await _getPubSubManager()
-        .getItems(jid, userAvatarMetadataXmlns, maxItems: 1);
+    final resultsRaw = await _getPubSubManager().getItems(
+      jid,
+      userAvatarMetadataXmlns,
+      maxItems: 1,
+    );
     if (resultsRaw.isType<PubSubError>()) return Result(UnknownAvatarError());
 
     final results = resultsRaw.get<List<PubSubItem>>();
@@ -167,15 +163,9 @@ class UserAvatarManager extends XmppManagerBase {
     final result = await pubsub.publish(
       getAttributes().getFullJID().toBare(),
       userAvatarDataXmlns,
-      XMLNode.xmlns(
-        tag: 'data',
-        xmlns: userAvatarDataXmlns,
-        text: base64,
-      ),
+      XMLNode.xmlns(tag: 'data', xmlns: userAvatarDataXmlns, text: base64),
       id: hash,
-      options: PubSubPublishOptions(
-        accessModel: public ? 'open' : 'roster',
-      ),
+      options: PubSubPublishOptions(accessModel: public ? 'open' : 'roster'),
     );
 
     if (result.isType<PubSubError>()) return Result(UnknownAvatarError());
@@ -211,9 +201,7 @@ class UserAvatarManager extends XmppManagerBase {
         ],
       ),
       id: metadata.id,
-      options: PubSubPublishOptions(
-        accessModel: public ? 'open' : 'roster',
-      ),
+      options: PubSubPublishOptions(accessModel: public ? 'open' : 'roster'),
     );
 
     if (result.isType<PubSubError>()) return Result(UnknownAvatarError());

@@ -77,8 +77,8 @@ class WebSocketXmppSocket extends BaseSocketWrapper {
     // [host] may carry a full WebSocket URL from the login "host" field.
     final preferred =
         (host != null && (host.startsWith('wss:') || host.startsWith('ws:')))
-            ? host
-            : preferredUrl;
+        ? host
+        : preferredUrl;
 
     final url = await resolveWebsocketUrl(domain, preferredUrl: preferred);
     if (url == null || url.isEmpty) {

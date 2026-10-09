@@ -33,13 +33,13 @@ class VCardManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'presence',
-          tagName: 'x',
-          tagXmlns: vCardTempUpdate,
-          callback: _onPresence,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'presence',
+      tagName: 'x',
+      tagXmlns: vCardTempUpdate,
+      callback: _onPresence,
+    ),
+  ];
 
   @override
   Future<bool> isSupported() async => true;
@@ -57,10 +57,7 @@ class VCardManager extends XmppManagerBase {
     final hash = x.firstTag('photo')!.innerText();
 
     getAttributes().sendEvent(
-      VCardAvatarUpdatedEvent(
-        JID.fromString(presence.from!),
-        hash,
-      ),
+      VCardAvatarUpdatedEvent(JID.fromString(presence.from!), hash),
     );
     return state;
   }
@@ -68,9 +65,7 @@ class VCardManager extends XmppManagerBase {
   VCardPhoto? _parseVCardPhoto(XMLNode? node) {
     if (node == null) return null;
 
-    return VCardPhoto(
-      binval: node.firstTag('BINVAL')?.innerText(),
-    );
+    return VCardPhoto(binval: node.firstTag('BINVAL')?.innerText());
   }
 
   VCard _parseVCard(XMLNode vcard) {
@@ -90,12 +85,7 @@ class VCardManager extends XmppManagerBase {
         Stanza.iq(
           to: jid.toString(),
           type: 'get',
-          children: [
-            XMLNode.xmlns(
-              tag: 'vCard',
-              xmlns: vCardTempXmlns,
-            ),
-          ],
+          children: [XMLNode.xmlns(tag: 'vCard', xmlns: vCardTempXmlns)],
         ),
         encrypted: true,
       ),

@@ -4,12 +4,7 @@ import 'package:moxxmpp/src/xeps/xep_0045/types.dart';
 
 /// Triggered when the MUC changes our nickname.
 class OwnDataChangedEvent extends XmppEvent {
-  OwnDataChangedEvent(
-    this.roomJid,
-    this.nick,
-    this.affiliation,
-    this.role,
-  );
+  OwnDataChangedEvent(this.roomJid, this.nick, this.affiliation, this.role);
 
   /// The JID of the room.
   final JID roomJid;
@@ -69,4 +64,15 @@ class MemberChangedNickEvent extends XmppEvent {
 
   /// The new nick.
   final String newNick;
+}
+
+/// Triggered when the room subject changes (XEP-0045).
+class RoomSubjectChangedEvent extends XmppEvent {
+  RoomSubjectChangedEvent(this.roomJid, this.subject);
+
+  /// The JID of the room.
+  final JID roomJid;
+
+  /// The new subject text (may be empty when cleared).
+  final String subject;
 }

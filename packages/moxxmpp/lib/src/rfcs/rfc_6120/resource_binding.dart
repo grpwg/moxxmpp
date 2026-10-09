@@ -17,7 +17,7 @@ class ResourceBindingFailedError extends NegotiatorError {
 /// resource.
 class ResourceBindingNegotiator extends XmppFeatureNegotiatorBase {
   ResourceBindingNegotiator()
-      : super(0, false, bindXmlns, resourceBindingNegotiator);
+    : super(0, false, bindXmlns, resourceBindingNegotiator);
 
   /// Flag indicating the state of the negotiator:
   /// - True: We sent a binding request
@@ -47,16 +47,8 @@ class ResourceBindingNegotiator extends XmppFeatureNegotiatorBase {
       final stanza = XMLNode.xmlns(
         tag: 'iq',
         xmlns: stanzaXmlns,
-        attributes: {
-          'type': 'set',
-          'id': const Uuid().v4(),
-        },
-        children: [
-          XMLNode.xmlns(
-            tag: 'bind',
-            xmlns: bindXmlns,
-          ),
-        ],
+        attributes: {'type': 'set', 'id': const Uuid().v4()},
+        children: [XMLNode.xmlns(tag: 'bind', xmlns: bindXmlns)],
       );
 
       _requestSent = true;

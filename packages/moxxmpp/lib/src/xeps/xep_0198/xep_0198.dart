@@ -24,9 +24,8 @@ const xmlUintMax = 4294967296; // 2**32
 typedef StanzaAckedCallback = bool Function(Stanza stanza);
 
 class StreamManagementManager extends XmppManagerBase {
-  StreamManagementManager({
-    this.ackTimeout = const Duration(seconds: 30),
-  }) : super(smManager);
+  StreamManagementManager({this.ackTimeout = const Duration(seconds: 30)})
+    : super(smManager);
 
   /// The queue of stanzas that are not (yet) acked
   final Map<int, SMQueueEntry> _unackedStanzas = {};
@@ -142,32 +141,27 @@ class StreamManagementManager extends XmppManagerBase {
 
   @override
   List<NonzaHandler> getNonzaHandlers() => [
-        NonzaHandler(
-          nonzaTag: 'r',
-          nonzaXmlns: smXmlns,
-          callback: _handleAckRequest,
-        ),
-        NonzaHandler(
-          nonzaTag: 'a',
-          nonzaXmlns: smXmlns,
-          callback: _handleAckResponse,
-        ),
-      ];
+    NonzaHandler(
+      nonzaTag: 'r',
+      nonzaXmlns: smXmlns,
+      callback: _handleAckRequest,
+    ),
+    NonzaHandler(
+      nonzaTag: 'a',
+      nonzaXmlns: smXmlns,
+      callback: _handleAckResponse,
+    ),
+  ];
 
   @override
   List<StanzaHandler> getIncomingPreStanzaHandlers() => [
-        StanzaHandler(
-          callback: _onServerStanzaReceived,
-          priority: 9999,
-        ),
-      ];
+    StanzaHandler(callback: _onServerStanzaReceived, priority: 9999),
+  ];
 
   @override
   List<StanzaHandler> getOutgoingPostStanzaHandlers() => [
-        StanzaHandler(
-          callback: _onClientStanzaSent,
-        ),
-      ];
+    StanzaHandler(callback: _onClientStanzaSent),
+  ];
 
   @override
   Future<void> onXmppEvent(XmppEvent event) async {
@@ -223,10 +217,7 @@ class StreamManagementManager extends XmppManagerBase {
     if (_ackTimer != null) return;
 
     logger.fine('Starting ack timer');
-    _ackTimer = Timer.periodic(
-      ackTimeout,
-      _ackTimerCallback,
-    );
+    _ackTimer = Timer.periodic(ackTimeout, _ackTimerCallback);
   }
 
   /// Stops the timer, if it is running.
@@ -245,9 +236,9 @@ class StreamManagementManager extends XmppManagerBase {
   @visibleForTesting
   Future<void> handleAckTimeout() async {
     _stopAckTimer();
-    await getAttributes()
-        .getConnection()
-        .handleError(StreamManagementAckTimeoutError());
+    await getAttributes().getConnection().handleError(
+      StreamManagementAckTimeoutError(),
+    );
   }
 
   /// Timer callback that checks if all acks have been answered. If not and the last
@@ -464,10 +455,7 @@ class StreamManagementManager extends XmppManagerBase {
         StanzaDetails(
           entry.value.stanza,
           postSendExtensions: TypedMap<StanzaHandlerExtension>.fromList([
-            StreamManagementData(
-              false,
-              entry.key,
-            ),
+            StreamManagementData(false, entry.key),
           ]),
           awaitable: false,
           // Prevent an E2EE message being encrypted again

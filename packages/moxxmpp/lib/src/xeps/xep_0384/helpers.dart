@@ -20,7 +20,8 @@ AxolotlBundle axolotlBundleFromXML(JID jid, int id, XMLNode bundle) {
   final spkId = int.parse(
     (spk.attributes['id'] ?? spk.attributes['signedPreKeyId'])! as String,
   );
-  final spks = bundle.firstTag('spks') ??
+  final spks =
+      bundle.firstTag('spks') ??
       bundle.firstTag('signedPreKeySignature') ??
       bundle.firstTag('spsk');
   final ik = bundle.firstTag('ik') ?? bundle.firstTag('identityKey');

@@ -8,7 +8,7 @@ import '../helpers/xmpp.dart';
 
 class ExampleNegotiator extends Sasl2FeatureNegotiator {
   ExampleNegotiator()
-      : super(0, false, 'invalid:example:dont:use', 'testNegotiator');
+    : super(0, false, 'invalid:example:dont:use', 'testNegotiator');
 
   String? value;
 
@@ -46,8 +46,10 @@ class ExampleNegotiator extends Sasl2FeatureNegotiator {
 
   @override
   Future<Result<bool, NegotiatorError>> onSasl2Success(XMLNode nonza) async {
-    final child =
-        nonza.firstTag('test-data', xmlns: 'invalid:example:dont:use');
+    final child = nonza.firstTag(
+      'test-data',
+      xmlns: 'invalid:example:dont:use',
+    );
     if (child == null) {
       return const Result(true);
     }
@@ -100,15 +102,17 @@ void main() {
         ignoreId: true,
       ),
     ]);
-    final conn = XmppConnection(
-      TestingReconnectionPolicy(),
-      AlwaysConnectedConnectivityManager(),
-      ClientToServerNegotiator(),
-      fakeSocket,
-    )..connectionSettings = ConnectionSettings(
-        jid: JID.fromString('polynomdivision@test.server'),
-        password: 'aaaa',
-      );
+    final conn =
+        XmppConnection(
+            TestingReconnectionPolicy(),
+            AlwaysConnectedConnectivityManager(),
+            ClientToServerNegotiator(),
+            fakeSocket,
+          )
+          ..connectionSettings = ConnectionSettings(
+            jid: JID.fromString('polynomdivision@test.server'),
+            password: 'aaaa',
+          );
     await conn.registerManagers([
       PresenceManager(),
       RosterManager(TestingRosterStateManager('', [])),
@@ -177,15 +181,17 @@ void main() {
         ignoreId: true,
       ),
     ]);
-    final conn = XmppConnection(
-      TestingReconnectionPolicy(),
-      AlwaysConnectedConnectivityManager(),
-      ClientToServerNegotiator(),
-      fakeSocket,
-    )..connectionSettings = ConnectionSettings(
-        jid: JID.fromString('user@server'),
-        password: 'pencil',
-      );
+    final conn =
+        XmppConnection(
+            TestingReconnectionPolicy(),
+            AlwaysConnectedConnectivityManager(),
+            ClientToServerNegotiator(),
+            fakeSocket,
+          )
+          ..connectionSettings = ConnectionSettings(
+            jid: JID.fromString('user@server'),
+            password: 'pencil',
+          );
     await conn.registerManagers([
       PresenceManager(),
       RosterManager(TestingRosterStateManager('', [])),
@@ -260,15 +266,17 @@ void main() {
         ignoreId: true,
       ),
     ]);
-    final conn = XmppConnection(
-      TestingReconnectionPolicy(),
-      AlwaysConnectedConnectivityManager(),
-      ClientToServerNegotiator(),
-      fakeSocket,
-    )..connectionSettings = ConnectionSettings(
-        jid: JID.fromString('user@server'),
-        password: 'pencil',
-      );
+    final conn =
+        XmppConnection(
+            TestingReconnectionPolicy(),
+            AlwaysConnectedConnectivityManager(),
+            ClientToServerNegotiator(),
+            fakeSocket,
+          )
+          ..connectionSettings = ConnectionSettings(
+            jid: JID.fromString('user@server'),
+            password: 'pencil',
+          );
     await conn.registerManagers([
       PresenceManager(),
       RosterManager(TestingRosterStateManager('', [])),
@@ -299,8 +307,7 @@ void main() {
     expect(result.isType<NegotiatorError>(), false);
   });
 
-  test('Test SCRAM-SHA-1 SASL2 negotiation with an invalid signature',
-      () async {
+  test('Test SCRAM-SHA-1 SASL2 negotiation with an invalid signature', () async {
     final fakeSocket = StubTCPSocket([
       StringExpectation(
         "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='server' from='user@server' xml:lang='en'>",
@@ -336,15 +343,17 @@ void main() {
         '<success xmlns="urn:xmpp:sasl:2"><additional-data>dj1zbUY5cHFWOFM3c3VBb1pXamE0ZEpSa0ZzS1E9</additional-data><authorization-identifier>user@server</authorization-identifier></success>',
       ),
     ]);
-    final conn = XmppConnection(
-      TestingReconnectionPolicy(),
-      AlwaysConnectedConnectivityManager(),
-      ClientToServerNegotiator(),
-      fakeSocket,
-    )..connectionSettings = ConnectionSettings(
-        jid: JID.fromString('user@server'),
-        password: 'pencil',
-      );
+    final conn =
+        XmppConnection(
+            TestingReconnectionPolicy(),
+            AlwaysConnectedConnectivityManager(),
+            ClientToServerNegotiator(),
+            fakeSocket,
+          )
+          ..connectionSettings = ConnectionSettings(
+            jid: JID.fromString('user@server'),
+            password: 'pencil',
+          );
     await conn.registerManagers([
       PresenceManager(),
       RosterManager(TestingRosterStateManager('', [])),
@@ -420,15 +429,17 @@ void main() {
         ignoreId: true,
       ),
     ]);
-    final conn = XmppConnection(
-      TestingReconnectionPolicy(),
-      AlwaysConnectedConnectivityManager(),
-      ClientToServerNegotiator(),
-      fakeSocket,
-    )..connectionSettings = ConnectionSettings(
-        jid: JID.fromString('polynomdivision@test.server'),
-        password: 'aaaa',
-      );
+    final conn =
+        XmppConnection(
+            TestingReconnectionPolicy(),
+            AlwaysConnectedConnectivityManager(),
+            ClientToServerNegotiator(),
+            fakeSocket,
+          )
+          ..connectionSettings = ConnectionSettings(
+            jid: JID.fromString('polynomdivision@test.server'),
+            password: 'aaaa',
+          );
     await conn.registerManagers([
       PresenceManager(),
       RosterManager(TestingRosterStateManager('', [])),
@@ -502,15 +513,17 @@ void main() {
         ignoreId: true,
       ),
     ]);
-    final conn = XmppConnection(
-      TestingReconnectionPolicy(),
-      AlwaysConnectedConnectivityManager(),
-      ClientToServerNegotiator(),
-      fakeSocket,
-    )..connectionSettings = ConnectionSettings(
-        jid: JID.fromString('polynomdivision@test.server'),
-        password: 'aaaa',
-      );
+    final conn =
+        XmppConnection(
+            TestingReconnectionPolicy(),
+            AlwaysConnectedConnectivityManager(),
+            ClientToServerNegotiator(),
+            fakeSocket,
+          )
+          ..connectionSettings = ConnectionSettings(
+            jid: JID.fromString('polynomdivision@test.server'),
+            password: 'aaaa',
+          );
     await conn.registerManagers([
       PresenceManager(),
       RosterManager(TestingRosterStateManager('', [])),

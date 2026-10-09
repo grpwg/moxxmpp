@@ -36,21 +36,21 @@ class CarbonsManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingPreStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'message',
-          tagName: 'received',
-          tagXmlns: carbonsXmlns,
-          callback: _onMessageReceived,
-          priority: -98,
-        ),
-        StanzaHandler(
-          stanzaTag: 'message',
-          tagName: 'sent',
-          tagXmlns: carbonsXmlns,
-          callback: _onMessageSent,
-          priority: -98,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'message',
+      tagName: 'received',
+      tagXmlns: carbonsXmlns,
+      callback: _onMessageReceived,
+      priority: -98,
+    ),
+    StanzaHandler(
+      stanzaTag: 'message',
+      tagName: 'sent',
+      tagXmlns: carbonsXmlns,
+      callback: _onMessageSent,
+      priority: -98,
+    ),
+  ];
 
   @override
   Future<bool> isSupported() async {
@@ -120,12 +120,7 @@ class CarbonsManager extends XmppManagerBase {
         Stanza.iq(
           to: attrs.getFullJID().toBare().toString(),
           type: 'set',
-          children: [
-            XMLNode.xmlns(
-              tag: 'enable',
-              xmlns: carbonsXmlns,
-            ),
-          ],
+          children: [XMLNode.xmlns(tag: 'enable', xmlns: carbonsXmlns)],
         ),
       ),
     ))!;
@@ -150,12 +145,7 @@ class CarbonsManager extends XmppManagerBase {
       StanzaDetails(
         Stanza.iq(
           type: 'set',
-          children: [
-            XMLNode.xmlns(
-              tag: 'disable',
-              xmlns: carbonsXmlns,
-            ),
-          ],
+          children: [XMLNode.xmlns(tag: 'disable', xmlns: carbonsXmlns)],
         ),
       ),
     ))!;
@@ -196,10 +186,7 @@ class CarbonsManager extends XmppManagerBase {
   /// Returns true if the carbon is valid. Returns false if not.
   bool isCarbonValid(JID senderJid) {
     return _isEnabled &&
-        getAttributes().getFullJID().bareCompare(
-              senderJid,
-              ensureBare: true,
-            );
+        getAttributes().getFullJID().bareCompare(senderJid, ensureBare: true);
   }
 }
 
@@ -239,12 +226,7 @@ class CarbonsNegotiator extends Bind2FeatureNegotiator {
     }
 
     _requestedEnablement = true;
-    return [
-      XMLNode.xmlns(
-        tag: 'enable',
-        xmlns: carbonsXmlns,
-      ),
-    ];
+    return [XMLNode.xmlns(tag: 'enable', xmlns: carbonsXmlns)];
   }
 
   @override

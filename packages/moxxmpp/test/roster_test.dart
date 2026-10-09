@@ -28,10 +28,7 @@ void main() {
       ClientToServerNegotiator(),
       socket,
     )..connectionSettings = cs;
-    await conn.registerManagers([
-      rm,
-      PresenceManager(),
-    ]);
+    await conn.registerManagers([rm, PresenceManager()]);
     await conn.registerFeatureNegotiators([
       SaslPlainNegotiator(),
       ResourceBindingNegotiator(),
@@ -39,10 +36,7 @@ void main() {
     ]);
 
     // Connect
-    await conn.connect(
-      shouldReconnect: false,
-      waitUntilLogin: true,
-    );
+    await conn.connect(shouldReconnect: false, waitUntilLogin: true);
 
     // Request the roster
     final rawResult = await rm.requestRoster();

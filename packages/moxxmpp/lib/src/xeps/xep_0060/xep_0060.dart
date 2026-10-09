@@ -17,10 +17,7 @@ import 'package:moxxmpp/src/xeps/xep_0060/errors.dart';
 import 'package:moxxmpp/src/xeps/xep_0060/helpers.dart';
 
 class PubSubPublishOptions {
-  const PubSubPublishOptions({
-    this.accessModel,
-    this.maxItems,
-  });
+  const PubSubPublishOptions({this.accessModel, this.maxItems});
   final String? accessModel;
   final String? maxItems;
 
@@ -76,13 +73,13 @@ class PubSubManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'message',
-          tagName: 'event',
-          tagXmlns: pubsubEventXmlns,
-          callback: _onPubsubMessage,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'message',
+      tagName: 'event',
+      tagXmlns: pubsubEventXmlns,
+      callback: _onPubsubMessage,
+    ),
+  ];
 
   @override
   Future<bool> isSupported() async => true;
@@ -145,17 +142,17 @@ class PubSubManager extends XmppManagerBase {
         }
       }
 
-      final nodeMultiItemsSupported = result.isType<DiscoInfo>() &&
+      final nodeMultiItemsSupported =
+          result.isType<DiscoInfo>() &&
           result.get<DiscoInfo>().features.contains(pubsubNodeConfigMultiItems);
-      final nodeMaxSupported = result.isType<DiscoInfo>() &&
+      final nodeMaxSupported =
+          result.isType<DiscoInfo>() &&
           result.get<DiscoInfo>().features.contains(pubsubNodeConfigMax);
       if (options.maxItems != null && !nodeMultiItemsSupported) {
         // TODO(PapaTutuWawa): Here, we need to admit defeat
         logger.finest('PubSub host does not support multi-items!');
 
-        return PubSubPublishOptions(
-          accessModel: options.accessModel,
-        );
+        return PubSubPublishOptions(accessModel: options.accessModel);
       } else if (options.maxItems == 'max' && !nodeMaxSupported) {
         logger.finest(
           'PubSub host does not support node-config-max. Working around it',
@@ -269,13 +266,7 @@ class PubSubManager extends XmppManagerBase {
     String? id,
     PubSubPublishOptions? options,
   }) async {
-    return _publish(
-      jid,
-      node,
-      payload,
-      id: id,
-      options: options,
-    );
+    return _publish(jid, node, payload, id: id, options: options);
   }
 
   Future<Result<PubSubError, bool>> _publish(
@@ -308,9 +299,7 @@ class PubSubManager extends XmppManagerBase {
                   children: [
                     XMLNode(
                       tag: 'item',
-                      attributes: {
-                        if (id != null) 'id': id,
-                      },
+                      attributes: {if (id != null) 'id': id},
                       children: [payload],
                     ),
                   ],
@@ -515,9 +504,7 @@ class PubSubManager extends XmppManagerBase {
               children: [
                 XMLNode(
                   tag: 'configure',
-                  attributes: <String, String>{
-                    'node': node,
-                  },
+                  attributes: <String, String>{'node': node},
                 ),
               ],
             ),
@@ -575,12 +562,8 @@ class PubSubManager extends XmppManagerBase {
               children: [
                 XMLNode(
                   tag: 'configure',
-                  attributes: <String, String>{
-                    'node': node,
-                  },
-                  children: [
-                    x,
-                  ],
+                  attributes: <String, String>{'node': node},
+                  children: [x],
                 ),
               ],
             ),
@@ -635,9 +618,7 @@ class PubSubManager extends XmppManagerBase {
               children: [
                 XMLNode(
                   tag: 'delete',
-                  attributes: <String, String>{
-                    'node': node,
-                  },
+                  attributes: <String, String>{'node': node},
                 ),
               ],
             ),
@@ -672,15 +653,11 @@ class PubSubManager extends XmppManagerBase {
               children: [
                 XMLNode(
                   tag: 'retract',
-                  attributes: <String, String>{
-                    'node': node,
-                  },
+                  attributes: <String, String>{'node': node},
                   children: [
                     XMLNode(
                       tag: 'item',
-                      attributes: <String, String>{
-                        'id': itemId,
-                      },
+                      attributes: <String, String>{'id': itemId},
                     ),
                   ],
                 ),

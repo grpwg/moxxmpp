@@ -125,17 +125,15 @@ void main() {
     final controller = StreamController<String>();
     var gotFeatures = false;
     unawaited(
-      controller.stream.transform(parser).forEach(
-        (events) {
-          for (final event in events) {
-            if (event is! XMPPStreamElement) continue;
+      controller.stream.transform(parser).forEach((events) {
+        for (final event in events) {
+          if (event is! XMPPStreamElement) continue;
 
-            if (event.node.tag == 'stream:features') {
-              gotFeatures = true;
-            }
+          if (event.node.tag == 'stream:features') {
+            gotFeatures = true;
           }
-        },
-      ),
+        }
+      }),
     );
 
     // Begin the stream with invalid XML
@@ -147,8 +145,7 @@ void main() {
 
     // Start a new stream
     parser.reset();
-    controller.add(
-      '''
+    controller.add('''
 <stream:stream
     xmlns="jabber:client"
     version="1.0"
@@ -160,8 +157,7 @@ void main() {
       <mechanism>PLAIN</mechanism>
     </mechanisms>
   </stream:features>
-      ''',
-    );
+      ''');
 
     // Let it marinate
     await Future<void>.delayed(const Duration(seconds: 1));

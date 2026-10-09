@@ -46,7 +46,7 @@ enum XmppConnectionState {
   connected,
 
   /// We have received an unrecoverable error and the server killed the connection
-  error
+  error,
 }
 
 /// (The actual stanza handler, Name of the owning manager).
@@ -70,16 +70,14 @@ class XmppConnection {
     this._negotiationsHandler,
     this._socket, {
     this.connectingTimeout = const Duration(minutes: 2),
-  })  : _reconnectionPolicy = reconnectionPolicy,
-        _connectivityManager = connectivityManager,
-        assert(
-          _socket.getDataStream().isBroadcast,
-          "The socket's data stream must be a broadcast stream",
-        ) {
+  }) : _reconnectionPolicy = reconnectionPolicy,
+       _connectivityManager = connectivityManager,
+       assert(
+         _socket.getDataStream().isBroadcast,
+         "The socket's data stream must be a broadcast stream",
+       ) {
     // Allow the reconnection policy to perform reconnections by itself
-    _reconnectionPolicy.register(
-      _attemptReconnection,
-    );
+    _reconnectionPolicy.register(_attemptReconnection);
 
     // Register the negotiations handler
     _negotiationsHandler.register(
@@ -105,10 +103,7 @@ class XmppConnection {
     _socketStream.listen(_handleOnDataCallbacks);
     _socket.getEventStream().listen(handleSocketEvent);
 
-    _stanzaQueue = AsyncStanzaQueue(
-      _sendStanzaImpl,
-      _canSendData,
-    );
+    _stanzaQueue = AsyncStanzaQueue(_sendStanzaImpl, _canSendData);
   }
 
   /// The state that the connection is currently in
@@ -135,14 +130,18 @@ class XmppConnection {
   late final StanzaAwaiter _stanzaAwaiter;
 
   /// Sorted list of handlers that we call or incoming and outgoing stanzas
-  final List<_StanzaHandlerWrapper> _incomingStanzaHandlers =
-      List.empty(growable: true);
-  final List<_StanzaHandlerWrapper> _incomingPreStanzaHandlers =
-      List.empty(growable: true);
-  final List<_StanzaHandlerWrapper> _outgoingPreStanzaHandlers =
-      List.empty(growable: true);
-  final List<_StanzaHandlerWrapper> _outgoingPostStanzaHandlers =
-      List.empty(growable: true);
+  final List<_StanzaHandlerWrapper> _incomingStanzaHandlers = List.empty(
+    growable: true,
+  );
+  final List<_StanzaHandlerWrapper> _incomingPreStanzaHandlers = List.empty(
+    growable: true,
+  );
+  final List<_StanzaHandlerWrapper> _outgoingPreStanzaHandlers = List.empty(
+    growable: true,
+  );
+  final List<_StanzaHandlerWrapper> _outgoingPostStanzaHandlers = List.empty(
+    growable: true,
+  );
   final StreamController<XmppEvent> _eventStreamController =
       StreamController.broadcast();
   final Map<String, XmppManagerBase> _xmppManagers = {};
@@ -338,11 +337,7 @@ class XmppConnection {
     // Connect again
     // ignore: cascade_invocations
     _log.finest('Calling _connectImpl() from _attemptReconnection');
-    unawaited(
-      _connectImpl(
-        waitForConnection: true,
-      ),
-    );
+    unawaited(_connectImpl(waitForConnection: true));
   }
 
   /// Called when a stream ending error has occurred
@@ -360,11 +355,7 @@ class XmppConnection {
         triggeredByUser: false,
         state: XmppConnectionState.error,
       );
-      _connectionCompleter?.complete(
-        Result(
-          error,
-        ),
-      );
+      _connectionCompleter?.complete(Result(error));
       _connectionCompleter = null;
       return;
     }
@@ -378,9 +369,7 @@ class XmppConnection {
         'Since a $error is not recoverable, not attempting a reconnection',
       );
       await _setConnectionState(XmppConnectionState.error);
-      await _sendEvent(
-        NonRecoverableErrorEvent(error),
-      );
+      await _sendEvent(NonRecoverableErrorEvent(error));
       return;
     }
 
@@ -458,10 +447,7 @@ class XmppConnection {
     );
 
     final completer = details.awaitable ? Completer<XMLNode>() : null;
-    final entry = StanzaQueueEntry(
-      details,
-      completer,
-    );
+    final entry = StanzaQueueEntry(details, completer);
 
     if (details.bypassQueue) {
       await _sendStanzaImpl(entry);
@@ -548,17 +534,17 @@ class XmppConnection {
     if (details.awaitable) {
       await _stanzaAwaiter
           .addPending(
-        // A stanza with no to attribute is for direct processing by the server. As such,
-        // we can correlate it by just *assuming* we have that attribute
-        // (RFC 6120 Section 8.1.1.1)
-        data.stanza.to,
-        data.stanza.id!,
-        data.stanza.tag,
-        responseCanBypassQueue: details.responseBypassesQueue,
-      )
+            // A stanza with no to attribute is for direct processing by the server. As such,
+            // we can correlate it by just *assuming* we have that attribute
+            // (RFC 6120 Section 8.1.1.1)
+            data.stanza.to,
+            data.stanza.id!,
+            data.stanza.tag,
+            responseCanBypassQueue: details.responseBypassesQueue,
+          )
           .then((result) {
-        entry.completer!.complete(result);
-      });
+            entry.completer!.complete(result);
+          });
     }
 
     if (await _canSendData()) {
@@ -653,12 +639,7 @@ class XmppConnection {
       _destroyConnectingTimer();
     }
 
-    await _sendEvent(
-      ConnectionStateChangedEvent(
-        state,
-        oldState,
-      ),
-    );
+    await _sendEvent(ConnectionStateChangedEvent(state, oldState));
   }
 
   /// Sets the routing state and logs the change
@@ -764,8 +745,9 @@ class XmppConnection {
       _log.finest('<== ${nonza.toXml()}');
 
       var nonzaHandled = false;
-      await Future.forEach(_xmppManagers.values,
-          (XmppManagerBase manager) async {
+      await Future.forEach(_xmppManagers.values, (
+        XmppManagerBase manager,
+      ) async {
         final handled = await manager.runNonzaHandlers(nonza);
 
         if (!nonzaHandled && handled) nonzaHandled = true;
@@ -782,7 +764,8 @@ class XmppConnection {
     // Run the incoming stanza handlers and bounce with an error if no manager handled
     // it.
     final incomingPreHandlers = await _runIncomingPreStanzaHandlers(stanza);
-    final prefix = incomingPreHandlers.encrypted &&
+    final prefix =
+        incomingPreHandlers.encrypted &&
             incomingPreHandlers.encryptionError == null
         ? '(Encrypted) '
         : '';
@@ -795,9 +778,7 @@ class XmppConnection {
       return;
     }
 
-    final awaited = await _stanzaAwaiter.onData(
-      incomingPreHandlers.stanza,
-    );
+    final awaited = await _stanzaAwaiter.onData(incomingPreHandlers.stanza);
     if (awaited) {
       return;
     }
@@ -830,10 +811,7 @@ class XmppConnection {
       return;
     }
 
-    assert(
-      event is XMPPStreamElement,
-      'The event must be a XMPPStreamElement',
-    );
+    assert(event is XMPPStreamElement, 'The event must be a XMPPStreamElement');
     final node = (event as XMPPStreamElement).node;
 
     // Check if we received a stream error
@@ -1022,11 +1000,7 @@ class XmppConnection {
     if (waitUntilLogin) {
       return result;
     } else {
-      return Future.value(
-        const Result(
-          true,
-        ),
-      );
+      return Future.value(const Result(true));
     }
   }
 }

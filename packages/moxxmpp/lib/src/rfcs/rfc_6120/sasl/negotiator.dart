@@ -5,7 +5,7 @@ import 'package:moxxmpp/src/stringxml.dart';
 
 abstract class SaslNegotiator extends XmppFeatureNegotiatorBase {
   SaslNegotiator(int priority, String id, this.mechanismName)
-      : super(priority, true, saslXmlns, id);
+    : super(priority, true, saslXmlns, id);
 
   /// The name inside the <mechanism /> element
   final String mechanismName;

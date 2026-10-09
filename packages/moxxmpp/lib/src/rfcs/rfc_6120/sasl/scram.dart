@@ -87,21 +87,16 @@ class SaslScramAuthNonza extends SaslAuthNonza {
   // This subclassing makes less sense here, but this is since the auth nonza here
   // requires knowledge of the inner state of the Negotiator.
   SaslScramAuthNonza({required ScramHashType type, required String body})
-      : super(
-          mechanismNameFromType(type),
-          body,
-        );
+    : super(mechanismNameFromType(type), body);
 }
 
 class SaslScramResponseNonza extends XMLNode {
   SaslScramResponseNonza({required String body})
-      : super(
-          tag: 'response',
-          attributes: <String, String>{
-            'xmlns': saslXmlns,
-          },
-          text: body,
-        );
+    : super(
+        tag: 'response',
+        attributes: <String, String>{'xmlns': saslXmlns},
+        text: body,
+      );
 }
 
 enum ScramState { preSent, initialMessageSent, challengeResponseSent, error }
@@ -115,16 +110,15 @@ class SaslScramNegotiator extends Sasl2AuthenticationNegotiator {
     this.initialMessageNoGS2,
     this.clientNonce,
     this.hashType,
-  )   : _hash = hashFromType(hashType),
-        _serverSignature = '',
-        _scramState = ScramState.preSent,
-        _log =
-            Logger('SaslScramNegotiator(${mechanismNameFromType(hashType)})'),
-        super(
-          priority,
-          namespaceFromType(hashType),
-          mechanismNameFromType(hashType),
-        );
+  ) : _hash = hashFromType(hashType),
+      _serverSignature = '',
+      _scramState = ScramState.preSent,
+      _log = Logger('SaslScramNegotiator(${mechanismNameFromType(hashType)})'),
+      super(
+        priority,
+        namespaceFromType(hashType),
+        mechanismNameFromType(hashType),
+      );
   String? clientNonce;
   String initialMessageNoGS2;
   final ScramHashType hashType;
@@ -158,8 +152,7 @@ class SaslScramNegotiator extends Sasl2AuthenticationNegotiator {
     return (await Hmac(_hash).calculateMac(
       utf8.encode('Client Key'),
       secretKey: SecretKey(saltedPassword),
-    ))
-        .bytes;
+    )).bytes;
   }
 
   Future<List<int>> calculateClientSignature(
@@ -169,16 +162,14 @@ class SaslScramNegotiator extends Sasl2AuthenticationNegotiator {
     return (await Hmac(_hash).calculateMac(
       utf8.encode(authMessage),
       secretKey: SecretKey(storedKey),
-    ))
-        .bytes;
+    )).bytes;
   }
 
   Future<List<int>> calculateServerKey(List<int> saltedPassword) async {
     return (await Hmac(_hash).calculateMac(
       utf8.encode('Server Key'),
       secretKey: SecretKey(saltedPassword),
-    ))
-        .bytes;
+    )).bytes;
   }
 
   Future<List<int>> calculateServerSignature(
@@ -188,8 +179,7 @@ class SaslScramNegotiator extends Sasl2AuthenticationNegotiator {
     return (await Hmac(_hash).calculateMac(
       utf8.encode(authMessage),
       secretKey: SecretKey(serverKey),
-    ))
-        .bytes;
+    )).bytes;
   }
 
   List<int> calculateClientProof(
@@ -217,12 +207,15 @@ class SaslScramNegotiator extends Sasl2AuthenticationNegotiator {
     final storedKey = (await _hash.hash(clientKey)).bytes;
     final authMessage =
         '$initialMessageNoGS2,$challengeString,$clientFinalMessageBare';
-    final clientSignature =
-        await calculateClientSignature(authMessage, storedKey);
+    final clientSignature = await calculateClientSignature(
+      authMessage,
+      storedKey,
+    );
     final clientProof = calculateClientProof(clientKey, clientSignature);
     final serverKey = await calculateServerKey(saltedPassword);
-    _serverSignature =
-        base64.encode(await calculateServerSignature(authMessage, serverKey));
+    _serverSignature = base64.encode(
+      await calculateServerSignature(authMessage, serverKey),
+    );
 
     return '$clientFinalMessageBare,p=${base64.encode(clientProof)}';
   }
@@ -244,8 +237,9 @@ class SaslScramNegotiator extends Sasl2AuthenticationNegotiator {
   }
 
   bool _checkSignature(String base64Signature) {
-    final signature =
-        parseKeyValue(utf8.decode(base64.decode(base64Signature)));
+    final signature = parseKeyValue(
+      utf8.decode(base64.decode(base64Signature)),
+    );
     _log.finest(
       'Expecting signature: "$_serverSignature", got: "${signature["v"]}"',
     );
@@ -259,10 +253,7 @@ class SaslScramNegotiator extends Sasl2AuthenticationNegotiator {
     switch (_scramState) {
       case ScramState.preSent:
         attributes.sendNonza(
-          SaslScramAuthNonza(
-            body: await getRawStep(''),
-            type: hashType,
-          ),
+          SaslScramAuthNonza(body: await getRawStep(''), type: hashType),
         );
         return const Result(NegotiatorState.ready);
       case ScramState.initialMessageSent:
@@ -271,9 +262,7 @@ class SaslScramNegotiator extends Sasl2AuthenticationNegotiator {
           await attributes.sendEvent(AuthenticationFailedEvent(error));
 
           _scramState = ScramState.error;
-          return Result(
-            SaslError.fromFailure(nonza),
-          );
+          return Result(SaslError.fromFailure(nonza));
         }
 
         attributes.sendNonza(
@@ -286,9 +275,7 @@ class SaslScramNegotiator extends Sasl2AuthenticationNegotiator {
           final error = nonza.children.first.tag;
           await attributes.sendEvent(AuthenticationFailedEvent(error));
           _scramState = ScramState.error;
-          return Result(
-            SaslError.fromFailure(nonza),
-          );
+          return Result(SaslError.fromFailure(nonza));
         }
 
         if (!_checkSignature(nonza.innerText())) {
@@ -296,17 +283,13 @@ class SaslScramNegotiator extends Sasl2AuthenticationNegotiator {
           //final error = nonza.children.first.tag;
           //attributes.sendEvent(AuthenticationFailedEvent(error));
           _scramState = ScramState.error;
-          return Result(
-            SaslError.fromFailure(nonza),
-          );
+          return Result(SaslError.fromFailure(nonza));
         }
 
         attributes.setAuthenticated();
         return const Result(NegotiatorState.done);
       case ScramState.error:
-        return Result(
-          SaslError.fromFailure(nonza),
-        );
+        return Result(SaslError.fromFailure(nonza));
     }
   }
 

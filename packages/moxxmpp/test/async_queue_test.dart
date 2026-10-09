@@ -4,28 +4,15 @@ import 'package:test/test.dart';
 
 void main() {
   test('Test not sending', () async {
-    final queue = AsyncStanzaQueue(
-      (entry) async {
-        assert(false, 'No stanza should be sent');
-      },
-      () async => false,
-    );
+    final queue = AsyncStanzaQueue((entry) async {
+      assert(false, 'No stanza should be sent');
+    }, () async => false);
 
     await queue.enqueueStanza(
-      StanzaQueueEntry(
-        StanzaDetails(
-          Stanza.message(),
-        ),
-        null,
-      ),
+      StanzaQueueEntry(StanzaDetails(Stanza.message()), null),
     );
     await queue.enqueueStanza(
-      StanzaQueueEntry(
-        StanzaDetails(
-          Stanza.message(),
-        ),
-        null,
-      ),
+      StanzaQueueEntry(StanzaDetails(Stanza.message()), null),
     );
 
     await Future<void>.delayed(const Duration(seconds: 1));
@@ -33,26 +20,13 @@ void main() {
   });
 
   test('Test sending', () async {
-    final queue = AsyncStanzaQueue(
-      (entry) async {},
-      () async => true,
-    );
+    final queue = AsyncStanzaQueue((entry) async {}, () async => true);
 
     await queue.enqueueStanza(
-      StanzaQueueEntry(
-        StanzaDetails(
-          Stanza.message(),
-        ),
-        null,
-      ),
+      StanzaQueueEntry(StanzaDetails(Stanza.message()), null),
     );
     await queue.enqueueStanza(
-      StanzaQueueEntry(
-        StanzaDetails(
-          Stanza.message(),
-        ),
-        null,
-      ),
+      StanzaQueueEntry(StanzaDetails(Stanza.message()), null),
     );
 
     await Future<void>.delayed(const Duration(seconds: 1));
@@ -61,28 +35,15 @@ void main() {
 
   test('Test partial sending and resuming', () async {
     var canRun = true;
-    final queue = AsyncStanzaQueue(
-      (entry) async {
-        canRun = false;
-      },
-      () async => canRun,
-    );
+    final queue = AsyncStanzaQueue((entry) async {
+      canRun = false;
+    }, () async => canRun);
 
     await queue.enqueueStanza(
-      StanzaQueueEntry(
-        StanzaDetails(
-          Stanza.message(),
-        ),
-        null,
-      ),
+      StanzaQueueEntry(StanzaDetails(Stanza.message()), null),
     );
     await queue.enqueueStanza(
-      StanzaQueueEntry(
-        StanzaDetails(
-          Stanza.message(),
-        ),
-        null,
-      ),
+      StanzaQueueEntry(StanzaDetails(Stanza.message()), null),
     );
 
     await Future<void>.delayed(const Duration(seconds: 1));

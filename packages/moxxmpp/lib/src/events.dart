@@ -113,11 +113,7 @@ class DeliveryReceiptReceivedEvent extends XmppEvent {
 }
 
 class ChatMarkerEvent extends XmppEvent {
-  ChatMarkerEvent(
-    this.from,
-    this.type,
-    this.id,
-  );
+  ChatMarkerEvent(this.from, this.type, this.id);
 
   /// The entity that sent the chat marker.
   final JID from;
@@ -168,10 +164,7 @@ class SubscriptionRequestReceivedEvent extends XmppEvent {
 
 /// Triggered when we receive a new or updated avatar via XEP-0084
 class UserAvatarUpdatedEvent extends XmppEvent {
-  UserAvatarUpdatedEvent(
-    this.jid,
-    this.metadata,
-  );
+  UserAvatarUpdatedEvent(this.jid, this.metadata);
 
   /// The JID of the user updating their avatar.
   final JID jid;
@@ -182,10 +175,7 @@ class UserAvatarUpdatedEvent extends XmppEvent {
 
 /// Triggered when we receive a new or updated avatar via XEP-0054
 class VCardAvatarUpdatedEvent extends XmppEvent {
-  VCardAvatarUpdatedEvent(
-    this.jid,
-    this.hash,
-  );
+  VCardAvatarUpdatedEvent(this.jid, this.hash);
 
   /// The JID of the entity that updated their avatar.
   final JID jid;

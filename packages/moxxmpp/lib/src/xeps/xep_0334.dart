@@ -47,10 +47,7 @@ enum MessageProcessingHint {
         break;
     }
 
-    return XMLNode.xmlns(
-      tag: tag,
-      xmlns: messageProcessingHintsXmlns,
-    );
+    return XMLNode.xmlns(tag: tag, xmlns: messageProcessingHintsXmlns);
   }
 }
 
@@ -69,14 +66,14 @@ class MessageProcessingHintManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'message',
-          tagXmlns: messageProcessingHintsXmlns,
-          callback: _onMessage,
-          // Before the message handler
-          priority: -99,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'message',
+      tagXmlns: messageProcessingHintsXmlns,
+      callback: _onMessage,
+      // Before the message handler
+      priority: -99,
+    ),
+  ];
 
   Future<StanzaHandlerData> _onMessage(
     Stanza stanza,

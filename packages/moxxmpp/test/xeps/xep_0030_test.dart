@@ -10,11 +10,10 @@ void main() {
   initLogger();
 
   test('Test having multiple disco requests for the same JID', () async {
-    final fakeSocket = StubTCPSocket(
-      [
-        StringExpectation(
-          "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='test.server' from='polynomdivision@test.server' xml:lang='en'>",
-          '''
+    final fakeSocket = StubTCPSocket([
+      StringExpectation(
+        "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='test.server' from='polynomdivision@test.server' xml:lang='en'>",
+        '''
 <stream:stream
     xmlns="jabber:client"
     version="1.0"
@@ -26,14 +25,14 @@ void main() {
       <mechanism>PLAIN</mechanism>
     </mechanisms>
   </stream:features>''',
-        ),
-        StringExpectation(
-          "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='PLAIN'>AHBvbHlub21kaXZpc2lvbgBhYWFh</auth>",
-          '<success xmlns="urn:ietf:params:xml:ns:xmpp-sasl" />',
-        ),
-        StringExpectation(
-          "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='test.server' from='polynomdivision@test.server' xml:lang='en'>",
-          '''
+      ),
+      StringExpectation(
+        "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='PLAIN'>AHBvbHlub21kaXZpc2lvbgBhYWFh</auth>",
+        '<success xmlns="urn:ietf:params:xml:ns:xmpp-sasl" />',
+      ),
+      StringExpectation(
+        "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='test.server' from='polynomdivision@test.server' xml:lang='en'>",
+        '''
 <stream:stream
     xmlns="jabber:client"
     version="1.0"
@@ -51,32 +50,33 @@ void main() {
     <sm xmlns="urn:xmpp:sm:3"/>
   </stream:features>
 ''',
-        ),
-        StanzaExpectation(
-          '<iq xmlns="jabber:client" type="set" id="a"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"/></iq>',
-          '<iq xmlns="jabber:client" type="result" id="a"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"><jid>polynomdivision@test.server/MU29eEZn</jid></bind></iq>',
-          ignoreId: true,
-        ),
-        StanzaExpectation(
-          "<presence xmlns='jabber:client'><show>chat</show><c xmlns='http://jabber.org/protocol/caps' hash='sha-1' node='http://moxxmpp.example' ver='3QvQ2RAy45XBDhArjxy/vEWMl+E=' /></presence>",
-          '',
-        ),
-        StanzaExpectation(
-          "<iq type='get' id='ec325efc-9924-4c48-93f8-ed34a2b0e5fc' to='romeo@montague.lit/orchard' xmlns='jabber:client'><query xmlns='http://jabber.org/protocol/disco#info' /></iq>",
-          '',
-          ignoreId: true,
-        ),
-      ],
-    );
-    final conn = XmppConnection(
-      TestingReconnectionPolicy(),
-      AlwaysConnectedConnectivityManager(),
-      ClientToServerNegotiator(),
-      fakeSocket,
-    )..connectionSettings = ConnectionSettings(
-        jid: JID.fromString('polynomdivision@test.server'),
-        password: 'aaaa',
-      );
+      ),
+      StanzaExpectation(
+        '<iq xmlns="jabber:client" type="set" id="a"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"/></iq>',
+        '<iq xmlns="jabber:client" type="result" id="a"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"><jid>polynomdivision@test.server/MU29eEZn</jid></bind></iq>',
+        ignoreId: true,
+      ),
+      StanzaExpectation(
+        "<presence xmlns='jabber:client'><show>chat</show><c xmlns='http://jabber.org/protocol/caps' hash='sha-1' node='http://moxxmpp.example' ver='3QvQ2RAy45XBDhArjxy/vEWMl+E=' /></presence>",
+        '',
+      ),
+      StanzaExpectation(
+        "<iq type='get' id='ec325efc-9924-4c48-93f8-ed34a2b0e5fc' to='romeo@montague.lit/orchard' xmlns='jabber:client'><query xmlns='http://jabber.org/protocol/disco#info' /></iq>",
+        '',
+        ignoreId: true,
+      ),
+    ]);
+    final conn =
+        XmppConnection(
+            TestingReconnectionPolicy(),
+            AlwaysConnectedConnectivityManager(),
+            ClientToServerNegotiator(),
+            fakeSocket,
+          )
+          ..connectionSettings = ConnectionSettings(
+            jid: JID.fromString('polynomdivision@test.server'),
+            password: 'aaaa',
+          );
     await conn.registerManagers([
       PresenceManager(),
       RosterManager(TestingRosterStateManager(null, [])),
@@ -127,13 +127,7 @@ void main() {
       ecm.injectIntoCache(
         aliceJid,
         'AAAAAAAAAAAAA',
-        DiscoInfo(
-          const [],
-          const [],
-          const [],
-          '',
-          aliceJid,
-        ),
+        DiscoInfo(const [], const [], const [], '', aliceJid),
       );
 
       // Query Alice's device

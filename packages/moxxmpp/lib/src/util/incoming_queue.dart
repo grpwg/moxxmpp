@@ -65,9 +65,7 @@ class IncomingStanzaQueue {
     await _lock.synchronized(() async {
       for (final object in objects) {
         if (await canBypassQueue(object)) {
-          unawaited(
-            _processStreamObject(null, object),
-          );
+          unawaited(_processStreamObject(null, object));
           continue;
         }
 
@@ -79,9 +77,7 @@ class IncomingStanzaQueue {
           completer.complete();
         }
 
-        unawaited(
-          _processStreamObject(completer.future, object),
-        );
+        unawaited(_processStreamObject(completer.future, object));
       }
     });
   }

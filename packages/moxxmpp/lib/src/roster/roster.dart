@@ -77,8 +77,8 @@ class RosterPushResult {
 /// A Stub feature negotiator for finding out whether roster versioning is supported.
 class RosterFeatureNegotiator extends XmppFeatureNegotiatorBase {
   RosterFeatureNegotiator()
-      : _supported = false,
-        super(11, false, rosterVersioningXmlns, rosterNegotiator);
+    : _supported = false,
+      super(11, false, rosterVersioningXmlns, rosterNegotiator);
 
   /// True if rosterVersioning is supported. False otherwise.
   bool _supported;
@@ -117,13 +117,13 @@ class RosterManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'iq',
-          tagName: 'query',
-          tagXmlns: rosterXmlns,
-          callback: _onRosterPush,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'iq',
+      tagName: 'query',
+      tagXmlns: rosterXmlns,
+      callback: _onRosterPush,
+    ),
+  ];
 
   @override
   Future<bool> isSupported() async => true;
@@ -154,7 +154,8 @@ class RosterManager extends XmppManagerBase {
     // the result therefore crashed the whole connection handler on a
     // perfectly ordinary push. Fall back to a name-only lookup, and tolerate
     // its absence.
-    final query = stanza.firstTag('query', xmlns: rosterXmlns) ??
+    final query =
+        stanza.firstTag('query', xmlns: rosterXmlns) ??
         stanza.children.where((c) => c.tag == 'query').firstOrNull;
     if (query == null) {
       logger.warning(
@@ -185,11 +186,7 @@ class RosterManager extends XmppManagerBase {
       ),
     );
 
-    await reply(
-      state,
-      'result',
-      [],
-    );
+    await reply(state, 'result', []);
 
     return state..done = true;
   }
@@ -230,12 +227,7 @@ class RosterManager extends XmppManagerBase {
       rosterVersion = query.attributes['ver'] as String?;
     } else if (requestedRosterVersion != null) {
       // Skip the handleRosterFetch call since nothing changed.
-      return Result(
-        RosterRequestResult(
-          [],
-          requestedRosterVersion,
-        ),
-      );
+      return Result(RosterRequestResult([], requestedRosterVersion));
     } else {
       logger.warning(
         'Server response to roster request without roster versioning does not contain a <query /> element, while the type is not error. This violates RFC6121',
@@ -243,14 +235,9 @@ class RosterManager extends XmppManagerBase {
       return Result(NoQueryError());
     }
 
-    final result = RosterRequestResult(
-      items,
-      rosterVersion,
-    );
+    final result = RosterRequestResult(items, rosterVersion);
 
-    unawaited(
-      _stateManager.handleRosterFetch(result),
-    );
+    unawaited(_stateManager.handleRosterFetch(result));
 
     return Result(result);
   }
@@ -262,10 +249,7 @@ class RosterManager extends XmppManagerBase {
     bool useRosterVersion = true,
   }) async {
     final attrs = getAttributes();
-    final query = XMLNode.xmlns(
-      tag: 'query',
-      xmlns: rosterXmlns,
-    );
+    final query = XMLNode.xmlns(tag: 'query', xmlns: rosterXmlns);
     final rosterVersion = await _stateManager.getRosterVersion();
     if (rosterVersion != null &&
         rosterVersioningAvailable() &&
@@ -274,14 +258,7 @@ class RosterManager extends XmppManagerBase {
     }
 
     final response = (await attrs.sendStanza(
-      StanzaDetails(
-        Stanza.iq(
-          type: 'get',
-          children: [
-            query,
-          ],
-        ),
-      ),
+      StanzaDetails(Stanza.iq(type: 'get', children: [query])),
     ))!;
 
     if (response.attributes['type'] != 'result') {
@@ -296,7 +273,7 @@ class RosterManager extends XmppManagerBase {
   /// Requests a series of roster pushes according to RFC6121. Requires that the server
   /// advertises urn:xmpp:features:rosterver in the stream features.
   Future<Result<RosterRequestResult?, RosterError>>
-      requestRosterPushes() async {
+  requestRosterPushes() async {
     final attrs = getAttributes();
     final rosterVersion = await _stateManager.getRosterVersion();
     final result = (await attrs.sendStanza(
@@ -307,9 +284,7 @@ class RosterManager extends XmppManagerBase {
             XMLNode.xmlns(
               tag: 'query',
               xmlns: rosterXmlns,
-              attributes: {
-                'ver': rosterVersion ?? '',
-              },
+              attributes: {'ver': rosterVersion ?? ''},
             ),
           ],
         ),
@@ -391,10 +366,7 @@ class RosterManager extends XmppManagerBase {
               children: [
                 XMLNode(
                   tag: 'item',
-                  attributes: {
-                    'jid': jid,
-                    'subscription': 'remove',
-                  },
+                  attributes: {'jid': jid, 'subscription': 'remove'},
                 ),
               ],
             ),

@@ -16,11 +16,7 @@ class StartTLSFailedError extends NegotiatorError {
 }
 
 class StartTLSNonza extends XMLNode {
-  StartTLSNonza()
-      : super.xmlns(
-          tag: 'starttls',
-          xmlns: startTlsXmlns,
-        );
+  StartTLSNonza() : super.xmlns(tag: 'starttls', xmlns: startTlsXmlns);
 }
 
 /// A negotiator implementing StartTLS.
@@ -58,9 +54,9 @@ class StartTlsNegotiator extends XmppFeatureNegotiatorBase {
         }
 
         _log.fine('Securing socket');
-        final result = await attributes
-            .getSocket()
-            .secure(attributes.getConnectionSettings().jid.domain);
+        final result = await attributes.getSocket().secure(
+          attributes.getConnectionSettings().jid.domain,
+        );
         if (!result) {
           _log.severe('Failed to secure stream');
           return Result(StartTLSFailedError());

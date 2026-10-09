@@ -1,10 +1,22 @@
 import 'dart:async';
+import 'package:moxxmpp/src/jid.dart';
 import 'package:moxxmpp/src/stringxml.dart';
 import 'package:synchronized/synchronized.dart';
 
 /// (JID we sent a stanza to, the id of the sent stanza, the tag of the sent stanza).
 // ignore: avoid_private_typedef_functions
 typedef _StanzaCompositeKey = (String?, String, String);
+
+/// Normalize for awaiter correlation: MUC IQs are often sent to a bare JID
+/// but answered from `room@host/nick`. Match on bare form so those complete.
+String? _awaiterJidKey(String? jid) {
+  if (jid == null || jid.isEmpty) return jid;
+  try {
+    return JID.fromString(jid).toBare().toString();
+  } catch (_) {
+    return jid;
+  }
+}
 
 /// Callback function that returns the bare JID of the connection as a String.
 typedef GetBareJidCallback = String Function();
@@ -49,7 +61,10 @@ class StanzaAwaiter {
     bool responseCanBypassQueue = true,
   }) async {
     // Check if we want to send a stanza to our bare JID and replace it with null.
-    final processedTo = to != null && to == _bareJidCallback() ? null : to;
+    final bareTo = _awaiterJidKey(to);
+    final processedTo = bareTo != null && bareTo == _bareJidCallback()
+        ? null
+        : bareTo;
 
     final completer = await _lock.synchronized(() {
       final completer = Completer<XMLNode>();
@@ -69,14 +84,12 @@ class StanzaAwaiter {
 
     // Check if we want to send a stanza to our bare JID and replace it with null.
     final from = stanza.attributes['from'] as String?;
-    final processedFrom =
-        from != null && from == _bareJidCallback() ? null : from;
+    final bareFrom = _awaiterJidKey(from);
+    final processedFrom = bareFrom != null && bareFrom == _bareJidCallback()
+        ? null
+        : bareFrom;
 
-    final key = (
-      processedFrom,
-      id,
-      stanza.tag,
-    );
+    final key = (processedFrom, id, stanza.tag);
 
     return _lock.synchronized(() {
       final pending = _pending[key];
@@ -97,11 +110,12 @@ class StanzaAwaiter {
     final id = stanza.attributes['id'] as String?;
     if (id == null) return (false, false);
 
-    final key = (
-      stanza.attributes['from'] as String?,
-      id,
-      stanza.tag,
-    );
+    final bareFrom = _awaiterJidKey(stanza.attributes['from'] as String?);
+    final processedFrom = bareFrom != null && bareFrom == _bareJidCallback()
+        ? null
+        : bareFrom;
+
+    final key = (processedFrom, id, stanza.tag);
 
     final result = await _lock.synchronized(() => _pending[key]);
     if (result == null) {

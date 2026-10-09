@@ -12,8 +12,8 @@ const exampleNamespace2 = 'im.moxxmpp.test.example2';
 
 class StubNegotiator1 extends XmppFeatureNegotiatorBase {
   StubNegotiator1()
-      : called = false,
-        super(1, false, exampleXmlns1, exampleNamespace1);
+    : called = false,
+      super(1, false, exampleXmlns1, exampleNamespace1);
 
   bool called;
 
@@ -28,8 +28,8 @@ class StubNegotiator1 extends XmppFeatureNegotiatorBase {
 
 class StubNegotiator2 extends XmppFeatureNegotiatorBase {
   StubNegotiator2()
-      : called = false,
-        super(10, false, exampleXmlns2, exampleNamespace2);
+    : called = false,
+      super(10, false, exampleXmlns2, exampleNamespace2);
 
   bool called;
 
@@ -57,10 +57,8 @@ void main() {
         (_) async {},
         () => false,
         (_) {},
-        () => ConnectionSettings(
-          jid: JID.fromString('test'),
-          password: 'abc123',
-        ),
+        () =>
+            ConnectionSettings(jid: JID.fromString('test'), password: 'abc123'),
         () {},
       )
       ..registerNegotiator(StubNegotiator1())
@@ -76,10 +74,8 @@ void main() {
         (_) async {},
         () => false,
         (_) {},
-        () => ConnectionSettings(
-          jid: JID.fromString('test'),
-          password: 'abc123',
-        ),
+        () =>
+            ConnectionSettings(jid: JID.fromString('test'), password: 'abc123'),
         () {},
       )
       ..registerNegotiator(StubNegotiator1())
@@ -88,13 +84,11 @@ void main() {
 
     await negotiator.negotiate(
       XMPPStreamElement(
-        XMLNode.fromString(
-          '''
+        XMLNode.fromString('''
 <stream:features xmlns="http://etherx.jabber.org/streams">
   <example1 xmlns="im:moxxmpp:example1" />
   <example2 xmlns="im:moxxmpp:example2" />
-</stream:features>''',
-        ),
+</stream:features>'''),
       ),
     );
 

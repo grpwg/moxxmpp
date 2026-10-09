@@ -22,9 +22,8 @@ extension StringToJid on String {
 /// A callback that is called whenever a message is sent using
 /// [MessageManager.sendMessage]. The input the typed map that is passed to
 /// sendMessage.
-typedef MessageSendingCallback = List<XMLNode> Function(
-  TypedMap<StanzaHandlerExtension>,
-);
+typedef MessageSendingCallback =
+    List<XMLNode> Function(TypedMap<StanzaHandlerExtension>);
 
 /// The raw content of the <body /> element.
 class MessageBodyData implements StanzaHandlerExtension {
@@ -34,10 +33,7 @@ class MessageBodyData implements StanzaHandlerExtension {
   final String? body;
 
   XMLNode toXML() {
-    return XMLNode(
-      tag: 'body',
-      text: body,
-    );
+    return XMLNode(tag: 'body', text: body);
   }
 }
 
@@ -68,12 +64,12 @@ class MessageManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'message',
-          callback: _onMessage,
-          priority: messageHandlerPriority,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'message',
+      callback: _onMessage,
+      priority: messageHandlerPriority,
+    ),
+  ];
 
   @override
   Future<bool> isSupported() async => true;
@@ -84,9 +80,7 @@ class MessageManager extends XmppManagerBase {
   ) async {
     final body = stanza.firstTag('body');
     if (body != null) {
-      state.extensions.set(
-        MessageBodyData(body.innerText()),
-      );
+      state.extensions.set(MessageBodyData(body.innerText()));
     }
 
     getAttributes().sendEvent(

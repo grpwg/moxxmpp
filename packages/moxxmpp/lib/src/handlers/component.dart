@@ -12,16 +12,16 @@ import 'package:moxxmpp/src/stringxml.dart';
 /// Nonza describing the XMPP stream header.
 class ComponentStreamHeaderNonza extends XMLNode {
   ComponentStreamHeaderNonza(JID jid)
-      : assert(jid.isBare(), 'Component JID must be bare'),
-        super(
-          tag: 'stream:stream',
-          attributes: <String, String>{
-            'xmlns': componentAcceptXmlns,
-            'xmlns:stream': streamXmlns,
-            'to': jid.domain,
-          },
-          closeTag: false,
-        );
+    : assert(jid.isBare(), 'Component JID must be bare'),
+      super(
+        tag: 'stream:stream',
+        attributes: <String, String>{
+          'xmlns': componentAcceptXmlns,
+          'xmlns:stream': streamXmlns,
+          'to': jid.domain,
+        },
+        closeTag: false,
+      );
 }
 
 /// The states the ComponentToServerNegotiator can be in.
@@ -56,9 +56,7 @@ class ComponentToServerNegotiator extends NegotiationsHandler {
         attributes: {'version': '1.0'},
         closeTag: false,
         isDeclaration: true,
-        children: [
-          ComponentStreamHeaderNonza(getConnectionSettings().jid),
-        ],
+        children: [ComponentStreamHeaderNonza(getConnectionSettings().jid)],
       ),
     );
   }
@@ -83,10 +81,7 @@ class ComponentToServerNegotiator extends NegotiationsHandler {
 
           _state = ComponentToServerState.handshakeSent;
           sendNonza(
-            XMLNode(
-              tag: 'handshake',
-              text: await _computeHandshake(streamId!),
-            ),
+            XMLNode(tag: 'handshake', text: await _computeHandshake(streamId!)),
           );
         } else {
           log.severe('Unexpected data received');

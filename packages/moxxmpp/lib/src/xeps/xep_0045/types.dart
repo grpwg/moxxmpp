@@ -77,9 +77,7 @@ class RoomInformation {
   /// Constructs a [RoomInformation] object from a [DiscoInfo] object.
   /// The [DiscoInfo] object contains the necessary information to populate
   /// the [RoomInformation] fields.
-  factory RoomInformation.fromDiscoInfo({
-    required DiscoInfo discoInfo,
-  }) =>
+  factory RoomInformation.fromDiscoInfo({required DiscoInfo discoInfo}) =>
       RoomInformation(
         jid: discoInfo.jid!,
         features: discoInfo.features,
@@ -162,6 +160,12 @@ class RoomState {
 
   /// Our own role inside the MUC.
   Role? role;
+
+  /// Current room subject (XEP-0045), or null when never announced.
+  ///
+  /// Empty string means the room cleared the subject. Distinct from null so
+  /// a fresh join without a subject stanza does not invent an empty topic.
+  String? subject;
 
   /// The list of messages that we sent and are waiting for their echo.
   late final List<PendingMessage> pendingMessages;

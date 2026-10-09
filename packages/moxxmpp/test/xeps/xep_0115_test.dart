@@ -43,11 +43,7 @@ class StubbedDiscoManager extends DiscoManager {
           if (multipleEqualFeatures) 'http://jabber.org/protocol/muc',
         ],
         [
-          const Identity(
-            category: 'client',
-            type: 'pc',
-            name: 'Exodus 0.9.1',
-          ),
+          const Identity(category: 'client', type: 'pc', name: 'Exodus 0.9.1'),
           if (multipleEqualIdentities)
             const Identity(
               category: 'client',
@@ -63,9 +59,7 @@ class StubbedDiscoManager extends DiscoManager {
               fields: [
                 DataFormField(
                   options: [],
-                  values: [
-                    'http://jabber.org/network/serverinfo',
-                  ],
+                  values: ['http://jabber.org/network/serverinfo'],
                   isRequired: false,
                   varAttr: 'FORM_TYPE',
                   type: 'hidden',
@@ -81,9 +75,7 @@ class StubbedDiscoManager extends DiscoManager {
               fields: [
                 DataFormField(
                   options: [],
-                  values: [
-                    'http://jabber.org/network/serverinfo',
-                  ],
+                  values: ['http://jabber.org/network/serverinfo'],
                   isRequired: false,
                   varAttr: 'FORM_TYPE',
                   type: 'hidden',
@@ -107,9 +99,7 @@ class StubbedDiscoManager extends DiscoManager {
               fields: [
                 DataFormField(
                   options: [],
-                  values: [
-                    'http://jabber.org/network/serverinfo',
-                  ],
+                  values: ['http://jabber.org/network/serverinfo'],
                   isRequired: false,
                   varAttr: 'FORM_TYPE',
                 ),
@@ -155,13 +145,7 @@ void main() {
         'http://jabber.org/protocol/disco#items',
         'http://jabber.org/protocol/muc',
       ],
-      const [
-        Identity(
-          category: 'client',
-          type: 'pc',
-          name: 'Exodus 0.9.1',
-        ),
-      ],
+      const [Identity(category: 'client', type: 'pc', name: 'Exodus 0.9.1')],
       const [],
       null,
       JID.fromString('some@user.local/test'),
@@ -182,18 +166,8 @@ void main() {
         'http://jabber.org/protocol/muc',
       ],
       const [
-        Identity(
-          category: 'client',
-          type: 'pc',
-          name: 'Psi 0.11',
-          lang: 'en',
-        ),
-        Identity(
-          category: 'client',
-          type: 'pc',
-          name: 'Ψ 0.11',
-          lang: 'el',
-        ),
+        Identity(category: 'client', type: 'pc', name: 'Psi 0.11', lang: 'en'),
+        Identity(category: 'client', type: 'pc', name: 'Ψ 0.11', lang: 'el'),
       ],
       [parseDataForm(XMLNode.fromString(extDiscoDataString))],
       null,
@@ -298,11 +272,7 @@ void main() {
         'urn:xmpp:time',
       ],
       const [
-        Identity(
-          category: 'client',
-          type: 'phone',
-          name: 'Conversations',
-        ),
+        Identity(category: 'client', type: 'phone', name: 'Conversations'),
       ],
       const [],
       null,
@@ -320,10 +290,7 @@ void main() {
       final tm = TestingManagerHolder();
       final manager = EntityCapabilitiesManager('');
 
-      await tm.register([
-        StubbedDiscoManager(),
-        manager,
-      ]);
+      await tm.register([StubbedDiscoManager(), manager]);
 
       final stanza = Stanza.presence(
         from: aliceJid.toString(),
@@ -345,20 +312,14 @@ void main() {
       );
       await Future<void>.delayed(const Duration(seconds: 2));
 
-      expect(
-        await manager.getCachedDiscoInfoFromJid(aliceJid) != null,
-        true,
-      );
+      expect(await manager.getCachedDiscoInfoFromJid(aliceJid) != null, true);
     });
 
     test('Not caching an incorrect capability hash string', () async {
       final tm = TestingManagerHolder();
       final manager = EntityCapabilitiesManager('');
 
-      await tm.register([
-        StubbedDiscoManager(),
-        manager,
-      ]);
+      await tm.register([StubbedDiscoManager(), manager]);
 
       final stanza = Stanza.presence(
         from: aliceJid.toString(),
@@ -379,10 +340,7 @@ void main() {
         StanzaHandlerData(false, false, stanza, TypedMap()),
       );
 
-      expect(
-        await manager.getCachedDiscoInfoFromJid(aliceJid),
-        null,
-      );
+      expect(await manager.getCachedDiscoInfoFromJid(aliceJid), null);
     });
 
     test('Not caching ill-formed identities', () async {
@@ -413,10 +371,7 @@ void main() {
         StanzaHandlerData(false, false, stanza, TypedMap()),
       );
 
-      expect(
-        await manager.getCachedDiscoInfoFromJid(aliceJid),
-        null,
-      );
+      expect(await manager.getCachedDiscoInfoFromJid(aliceJid), null);
     });
 
     test('Not caching ill-formed features', () async {
@@ -447,10 +402,7 @@ void main() {
         StanzaHandlerData(false, false, stanza, TypedMap()),
       );
 
-      expect(
-        await manager.getCachedDiscoInfoFromJid(aliceJid),
-        null,
-      );
+      expect(await manager.getCachedDiscoInfoFromJid(aliceJid), null);
     });
 
     test('Not caching multiple forms with equal FORM_TYPE', () async {
@@ -481,10 +433,7 @@ void main() {
         StanzaHandlerData(false, false, stanza, TypedMap()),
       );
 
-      expect(
-        await manager.getCachedDiscoInfoFromJid(aliceJid),
-        null,
-      );
+      expect(await manager.getCachedDiscoInfoFromJid(aliceJid), null);
     });
 
     test('Caching without invalid form (no FORM_TYPE)', () async {
@@ -517,10 +466,7 @@ void main() {
       await Future<void>.delayed(const Duration(seconds: 2));
 
       final cachedItem = await manager.getCachedDiscoInfoFromJid(aliceJid);
-      expect(
-        cachedItem != null,
-        true,
-      );
+      expect(cachedItem != null, true);
       expect(cachedItem!.extendedInfo.isEmpty, true);
     });
 
@@ -554,10 +500,7 @@ void main() {
       await Future<void>.delayed(const Duration(seconds: 2));
 
       final cachedItem = await manager.getCachedDiscoInfoFromJid(aliceJid);
-      expect(
-        cachedItem != null,
-        true,
-      );
+      expect(cachedItem != null, true);
       expect(cachedItem!.extendedInfo.isEmpty, true);
     });
 
@@ -589,10 +532,7 @@ void main() {
         StanzaHandlerData(false, false, stanza, TypedMap()),
       );
 
-      expect(
-        await manager.getCachedDiscoInfoFromJid(aliceJid),
-        null,
-      );
+      expect(await manager.getCachedDiscoInfoFromJid(aliceJid), null);
     });
   });
 }

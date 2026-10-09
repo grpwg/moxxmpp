@@ -41,9 +41,7 @@ class StatelessFileSharingUrlSource extends StatelessFileSharingSource {
     return XMLNode.xmlns(
       tag: 'url-data',
       xmlns: urlDataXmlns,
-      attributes: <String, String>{
-        'target': url,
-      },
+      attributes: <String, String>{'target': url},
     );
   }
 }
@@ -115,9 +113,10 @@ class StatelessFileSharingData implements StanzaHandlerExtension {
 
   StatelessFileSharingUrlSource? getFirstUrlSource() {
     return sources.firstWhereOrNull(
-      (StatelessFileSharingSource source) =>
-          source is StatelessFileSharingUrlSource,
-    ) as StatelessFileSharingUrlSource?;
+          (StatelessFileSharingSource source) =>
+              source is StatelessFileSharingUrlSource,
+        )
+        as StatelessFileSharingUrlSource?;
   }
 }
 
@@ -126,15 +125,15 @@ class SFSManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'message',
-          tagName: 'file-sharing',
-          tagXmlns: sfsXmlns,
-          callback: _onMessage,
-          // Before the message handler
-          priority: -98,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'message',
+      tagName: 'file-sharing',
+      tagXmlns: sfsXmlns,
+      callback: _onMessage,
+      // Before the message handler
+      priority: -98,
+    ),
+  ];
 
   @override
   Future<bool> isSupported() async => true;
@@ -170,10 +169,7 @@ class SFSManager extends XmppManagerBase {
   ) async {
     final sfs = message.firstTag('file-sharing', xmlns: sfsXmlns)!;
 
-    return state
-      ..extensions.set(
-        StatelessFileSharingData.fromXML(sfs),
-      );
+    return state..extensions.set(StatelessFileSharingData.fromXML(sfs));
   }
 
   @override

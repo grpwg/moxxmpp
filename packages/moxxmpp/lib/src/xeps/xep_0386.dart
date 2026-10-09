@@ -25,11 +25,8 @@ abstract class Bind2FeatureNegotiatorInterface {
 /// [Bind2FeatureNegotiatorInterface].
 abstract class Bind2FeatureNegotiator extends XmppFeatureNegotiatorBase
     implements Bind2FeatureNegotiatorInterface {
-  Bind2FeatureNegotiator(
-    int priority,
-    String negotiatingXmlns,
-    String id,
-  ) : super(priority, false, negotiatingXmlns, id);
+  Bind2FeatureNegotiator(int priority, String negotiatingXmlns, String id)
+    : super(priority, false, negotiatingXmlns, id);
 
   @override
   bool matchesFeature(List<XMLNode> features) => false;
@@ -101,11 +98,7 @@ class Bind2Negotiator extends Sasl2FeatureNegotiator {
         tag: 'bind',
         xmlns: bind2Xmlns,
         children: [
-          if (tag != null)
-            XMLNode(
-              tag: 'tag',
-              text: tag,
-            ),
+          if (tag != null) XMLNode(tag: 'tag', text: tag),
           ...children,
         ],
       ),

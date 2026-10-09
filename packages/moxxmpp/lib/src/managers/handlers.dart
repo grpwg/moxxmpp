@@ -15,11 +15,7 @@ abstract class Handler {
 
 /// A Handler that specialises in matching Nonzas (and stanzas).
 class NonzaHandler extends Handler {
-  NonzaHandler({
-    required this.callback,
-    this.nonzaTag,
-    this.nonzaXmlns,
-  });
+  NonzaHandler({required this.callback, this.nonzaTag, this.nonzaXmlns});
 
   /// The function to call when a nonza matches the description.
   final Future<bool> Function(XMLNode) callback;
@@ -100,7 +96,8 @@ class StanzaHandler extends Handler {
         matches &= firstTag?.xmlns == tagXmlns;
       }
     } else if (tagXmlns != null) {
-      matches &= node.children.firstWhereOrNull(
+      matches &=
+          node.children.firstWhereOrNull(
             (XMLNode node_) => node_.attributes['xmlns'] == tagXmlns,
           ) !=
           null;

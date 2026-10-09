@@ -45,17 +45,13 @@ void main() {
 
   test('Test calling the message sending callback', () {
     final result = MessageRepliesManager().messageSendingCallback(
-      TypedMap()
-        ..set(
-          ReplyData.fromQuoteData(
-            'some-random-id',
-            QuoteData.fromBodies(
-              'Hello world',
-              'How are you doing?',
-            ),
-            jid: JID.fromString('quoted-user@example.org'),
-          ),
+      TypedMap()..set(
+        ReplyData.fromQuoteData(
+          'some-random-id',
+          QuoteData.fromBodies('Hello world', 'How are you doing?'),
+          jid: JID.fromString('quoted-user@example.org'),
         ),
+      ),
     );
 
     final reply = result.firstWhere((e) => e.tag == 'reply');
@@ -69,11 +65,10 @@ void main() {
   });
 
   test('Test parsing a reply without fallback', () async {
-    final fakeSocket = StubTCPSocket(
-      [
-        StringExpectation(
-          "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='test.server' from='polynomdivision@test.server' xml:lang='en'>",
-          '''
+    final fakeSocket = StubTCPSocket([
+      StringExpectation(
+        "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='test.server' from='polynomdivision@test.server' xml:lang='en'>",
+        '''
 <stream:stream
     xmlns="jabber:client"
     version="1.0"
@@ -85,14 +80,14 @@ void main() {
       <mechanism>PLAIN</mechanism>
     </mechanisms>
   </stream:features>''',
-        ),
-        StringExpectation(
-          "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='PLAIN'>AHBvbHlub21kaXZpc2lvbgBhYWFh</auth>",
-          '<success xmlns="urn:ietf:params:xml:ns:xmpp-sasl" />',
-        ),
-        StringExpectation(
-          "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='test.server' from='polynomdivision@test.server' xml:lang='en'>",
-          '''
+      ),
+      StringExpectation(
+        "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='PLAIN'>AHBvbHlub21kaXZpc2lvbgBhYWFh</auth>",
+        '<success xmlns="urn:ietf:params:xml:ns:xmpp-sasl" />',
+      ),
+      StringExpectation(
+        "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='test.server' from='polynomdivision@test.server' xml:lang='en'>",
+        '''
 <stream:stream
     xmlns="jabber:client"
     version="1.0"
@@ -110,27 +105,25 @@ void main() {
     <sm xmlns="urn:xmpp:sm:3"/>
   </stream:features>
 ''',
-        ),
-        StanzaExpectation(
-          '<iq xmlns="jabber:client" type="set" id="a"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"/></iq>',
-          '<iq xmlns="jabber:client" type="result" id="a"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"><jid>polynomdivision@test.server/MU29eEZn</jid></bind></iq>',
-          ignoreId: true,
-        ),
-      ],
-    );
-    final conn = XmppConnection(
-      TestingReconnectionPolicy(),
-      AlwaysConnectedConnectivityManager(),
-      ClientToServerNegotiator(),
-      fakeSocket,
-    )..connectionSettings = ConnectionSettings(
-        jid: JID.fromString('polynomdivision@test.server'),
-        password: 'aaaa',
-      );
-    await conn.registerManagers([
-      MessageManager(),
-      MessageRepliesManager(),
+      ),
+      StanzaExpectation(
+        '<iq xmlns="jabber:client" type="set" id="a"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"/></iq>',
+        '<iq xmlns="jabber:client" type="result" id="a"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"><jid>polynomdivision@test.server/MU29eEZn</jid></bind></iq>',
+        ignoreId: true,
+      ),
     ]);
+    final conn =
+        XmppConnection(
+            TestingReconnectionPolicy(),
+            AlwaysConnectedConnectivityManager(),
+            ClientToServerNegotiator(),
+            fakeSocket,
+          )
+          ..connectionSettings = ConnectionSettings(
+            jid: JID.fromString('polynomdivision@test.server'),
+            password: 'aaaa',
+          );
+    await conn.registerManagers([MessageManager(), MessageRepliesManager()]);
     await conn.registerFeatureNegotiators([
       SaslPlainNegotiator(),
       ResourceBindingNegotiator(),
@@ -149,14 +142,12 @@ void main() {
     });
 
     // Send the fake message
-    fakeSocket.injectRawXml(
-      '''
+    fakeSocket.injectRawXml('''
 <message id="aaaaaaaaa" from="user@example.org" to="polynomdivision@test.server/abc123" type="chat">
   <body>Great idea!</body>
   <reply to='anna@example.com/tablet' id='message-id1' xmlns='urn:xmpp:reply:0' />
 </message>
-''',
-    );
+''');
 
     await Future<void>.delayed(const Duration(seconds: 2));
     final reply = messageEvent!.extensions.get<ReplyData>()!;
@@ -168,11 +159,10 @@ void main() {
   });
 
   test('Test parsing a reply with a fallback', () async {
-    final fakeSocket = StubTCPSocket(
-      [
-        StringExpectation(
-          "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='test.server' from='polynomdivision@test.server' xml:lang='en'>",
-          '''
+    final fakeSocket = StubTCPSocket([
+      StringExpectation(
+        "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='test.server' from='polynomdivision@test.server' xml:lang='en'>",
+        '''
 <stream:stream
     xmlns="jabber:client"
     version="1.0"
@@ -184,14 +174,14 @@ void main() {
       <mechanism>PLAIN</mechanism>
     </mechanisms>
   </stream:features>''',
-        ),
-        StringExpectation(
-          "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='PLAIN'>AHBvbHlub21kaXZpc2lvbgBhYWFh</auth>",
-          '<success xmlns="urn:ietf:params:xml:ns:xmpp-sasl" />',
-        ),
-        StringExpectation(
-          "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='test.server' from='polynomdivision@test.server' xml:lang='en'>",
-          '''
+      ),
+      StringExpectation(
+        "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='PLAIN'>AHBvbHlub21kaXZpc2lvbgBhYWFh</auth>",
+        '<success xmlns="urn:ietf:params:xml:ns:xmpp-sasl" />',
+      ),
+      StringExpectation(
+        "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='test.server' from='polynomdivision@test.server' xml:lang='en'>",
+        '''
 <stream:stream
     xmlns="jabber:client"
     version="1.0"
@@ -209,27 +199,25 @@ void main() {
     <sm xmlns="urn:xmpp:sm:3"/>
   </stream:features>
 ''',
-        ),
-        StanzaExpectation(
-          '<iq xmlns="jabber:client" type="set" id="a"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"/></iq>',
-          '<iq xmlns="jabber:client" type="result" id="a"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"><jid>polynomdivision@test.server/MU29eEZn</jid></bind></iq>',
-          ignoreId: true,
-        ),
-      ],
-    );
-    final conn = XmppConnection(
-      TestingReconnectionPolicy(),
-      AlwaysConnectedConnectivityManager(),
-      ClientToServerNegotiator(),
-      fakeSocket,
-    )..connectionSettings = ConnectionSettings(
-        jid: JID.fromString('polynomdivision@test.server'),
-        password: 'aaaa',
-      );
-    await conn.registerManagers([
-      MessageManager(),
-      MessageRepliesManager(),
+      ),
+      StanzaExpectation(
+        '<iq xmlns="jabber:client" type="set" id="a"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"/></iq>',
+        '<iq xmlns="jabber:client" type="result" id="a"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"><jid>polynomdivision@test.server/MU29eEZn</jid></bind></iq>',
+        ignoreId: true,
+      ),
     ]);
+    final conn =
+        XmppConnection(
+            TestingReconnectionPolicy(),
+            AlwaysConnectedConnectivityManager(),
+            ClientToServerNegotiator(),
+            fakeSocket,
+          )
+          ..connectionSettings = ConnectionSettings(
+            jid: JID.fromString('polynomdivision@test.server'),
+            password: 'aaaa',
+          );
+    await conn.registerManagers([MessageManager(), MessageRepliesManager()]);
     await conn.registerFeatureNegotiators([
       SaslPlainNegotiator(),
       ResourceBindingNegotiator(),
@@ -248,8 +236,7 @@ void main() {
     });
 
     // Send the fake message
-    fakeSocket.injectRawXml(
-      '''
+    fakeSocket.injectRawXml('''
 <message id="aaaaaaaaa" from="user@example.org" to="polynomdivision@test.server/abc123" type="chat">
   <body>> Anna wrote:\n> We should bake a cake\nGreat idea!</body>
   <reply to='anna@example.com/laptop' id='message-id1' xmlns='urn:xmpp:reply:0' />
@@ -257,8 +244,7 @@ void main() {
     <body start="0" end="38" />
   </fallback>
 </message>
-''',
-    );
+''');
 
     await Future<void>.delayed(const Duration(seconds: 2));
     final reply = messageEvent!.extensions.get<ReplyData>()!;

@@ -261,39 +261,34 @@ void main() {
         ),
       ]),
     );
-    await holder.register([
-      manager,
-      StickersManager(),
-      SFSManager(),
-    ]);
+    await holder.register([manager, StickersManager(), SFSManager()]);
 
     await manager.sendMessage(
       JID.fromString('user@example.org'),
-      TypedMap()
-        ..set(
-          StickersData(
-            'EpRv28DHHzFrE4zd+xaNpVb4',
-            StatelessFileSharingData(
-              const FileMetadataData(
-                mediaType: 'image/png',
-                desc: '😘',
-                size: 67016,
-                width: 512,
-                height: 512,
-                hashes: {
-                  HashFunction.sha256:
-                      'gw+6xdCgOcvCYSKuQNrXH33lV9NMzuDf/s0huByCDsY=',
-                },
-                thumbnails: [],
-              ),
-              [
-                StatelessFileSharingUrlSource(
-                  'https://download.montague.lit/51078299-d071-46e1-b6d3-3de4a8ab67d6/sticker_marsey_kiss.png',
-                ),
-              ],
+      TypedMap()..set(
+        StickersData(
+          'EpRv28DHHzFrE4zd+xaNpVb4',
+          StatelessFileSharingData(
+            const FileMetadataData(
+              mediaType: 'image/png',
+              desc: '😘',
+              size: 67016,
+              width: 512,
+              height: 512,
+              hashes: {
+                HashFunction.sha256:
+                    'gw+6xdCgOcvCYSKuQNrXH33lV9NMzuDf/s0huByCDsY=',
+              },
+              thumbnails: [],
             ),
+            [
+              StatelessFileSharingUrlSource(
+                'https://download.montague.lit/51078299-d071-46e1-b6d3-3de4a8ab67d6/sticker_marsey_kiss.png',
+              ),
+            ],
           ),
         ),
+      ),
     );
     await Future<void>.delayed(const Duration(seconds: 1));
 
@@ -301,11 +296,10 @@ void main() {
   });
 
   test('Test receiving a sticker', () async {
-    final fakeSocket = StubTCPSocket(
-      [
-        StringExpectation(
-          "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='test.server' from='polynomdivision@test.server' xml:lang='en'>",
-          '''
+    final fakeSocket = StubTCPSocket([
+      StringExpectation(
+        "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='test.server' from='polynomdivision@test.server' xml:lang='en'>",
+        '''
 <stream:stream
     xmlns="jabber:client"
     version="1.0"
@@ -317,14 +311,14 @@ void main() {
       <mechanism>PLAIN</mechanism>
     </mechanisms>
   </stream:features>''',
-        ),
-        StringExpectation(
-          "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='PLAIN'>AHBvbHlub21kaXZpc2lvbgBhYWFh</auth>",
-          '<success xmlns="urn:ietf:params:xml:ns:xmpp-sasl" />',
-        ),
-        StringExpectation(
-          "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='test.server' from='polynomdivision@test.server' xml:lang='en'>",
-          '''
+      ),
+      StringExpectation(
+        "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='PLAIN'>AHBvbHlub21kaXZpc2lvbgBhYWFh</auth>",
+        '<success xmlns="urn:ietf:params:xml:ns:xmpp-sasl" />',
+      ),
+      StringExpectation(
+        "<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='test.server' from='polynomdivision@test.server' xml:lang='en'>",
+        '''
 <stream:stream
     xmlns="jabber:client"
     version="1.0"
@@ -342,23 +336,24 @@ void main() {
     <sm xmlns="urn:xmpp:sm:3"/>
   </stream:features>
 ''',
-        ),
-        StanzaExpectation(
-          '<iq xmlns="jabber:client" type="set" id="a"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"/></iq>',
-          '<iq xmlns="jabber:client" type="result" id="a"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"><jid>polynomdivision@test.server/MU29eEZn</jid></bind></iq>',
-          ignoreId: true,
-        ),
-      ],
-    );
-    final conn = XmppConnection(
-      TestingReconnectionPolicy(),
-      AlwaysConnectedConnectivityManager(),
-      ClientToServerNegotiator(),
-      fakeSocket,
-    )..connectionSettings = ConnectionSettings(
-        jid: JID.fromString('polynomdivision@test.server'),
-        password: 'aaaa',
-      );
+      ),
+      StanzaExpectation(
+        '<iq xmlns="jabber:client" type="set" id="a"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"/></iq>',
+        '<iq xmlns="jabber:client" type="result" id="a"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"><jid>polynomdivision@test.server/MU29eEZn</jid></bind></iq>',
+        ignoreId: true,
+      ),
+    ]);
+    final conn =
+        XmppConnection(
+            TestingReconnectionPolicy(),
+            AlwaysConnectedConnectivityManager(),
+            ClientToServerNegotiator(),
+            fakeSocket,
+          )
+          ..connectionSettings = ConnectionSettings(
+            jid: JID.fromString('polynomdivision@test.server'),
+            password: 'aaaa',
+          );
     await conn.registerManagers([
       MessageManager(),
       SFSManager(),
@@ -382,8 +377,7 @@ void main() {
     });
 
     // Send the fake message
-    fakeSocket.injectRawXml(
-      '''
+    fakeSocket.injectRawXml('''
 <message id="aaaaaaaaa" from="user@example.org" to="polynomdivision@test.server/abc123" type="chat">
   <sticker xmlns='urn:xmpp:stickers:0' pack='EpRv28DHHzFrE4zd+xaNpVb4' />
   <file-sharing xmlns='urn:xmpp:sfs:0'>
@@ -400,17 +394,13 @@ void main() {
     </sources>
   </file-sharing>
 </message>
-''',
-    );
+''');
 
     await Future<void>.delayed(const Duration(seconds: 2));
     final sticker = messageEvent!.extensions.get<StickersData>()!;
     final sfs = messageEvent!.extensions.get<StatelessFileSharingData>()!;
     expect(sticker.stickerPackId, 'EpRv28DHHzFrE4zd+xaNpVb4');
     expect(sfs.metadata.desc, '😘');
-    expect(
-      sfs.sources.first is StatelessFileSharingUrlSource,
-      true,
-    );
+    expect(sfs.sources.first is StatelessFileSharingUrlSource, true);
   });
 }

@@ -8,20 +8,14 @@ void main() {
         'authorization': 'Basic Base64String==',
         'cookie': 'foo=bar; user=romeo',
       };
-      expect(
-        prepareHeaders(headers),
-        headers,
-      );
+      expect(prepareHeaders(headers), headers);
     });
     test('invariance through uppercase', () {
       final headers = {
         'Authorization': 'Basic Base64String==',
         'Cookie': 'foo=bar; user=romeo',
       };
-      expect(
-        prepareHeaders(headers),
-        headers,
-      );
+      expect(prepareHeaders(headers), headers);
     });
     test('remove unspecified headers', () {
       final headers = {

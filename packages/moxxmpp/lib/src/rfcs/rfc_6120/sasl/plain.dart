@@ -12,18 +12,14 @@ import 'package:moxxmpp/src/xeps/xep_0388/xep_0388.dart';
 import 'package:saslprep/saslprep.dart';
 
 class SaslPlainAuthNonza extends SaslAuthNonza {
-  SaslPlainAuthNonza(String data)
-      : super(
-          'PLAIN',
-          data,
-        );
+  SaslPlainAuthNonza(String data) : super('PLAIN', data);
 }
 
 class SaslPlainNegotiator extends Sasl2AuthenticationNegotiator {
   SaslPlainNegotiator()
-      : _authSent = false,
-        _log = Logger('SaslPlainNegotiator'),
-        super(0, saslPlainNegotiator, 'PLAIN');
+    : _authSent = false,
+      _log = Logger('SaslPlainNegotiator'),
+      super(0, saslPlainNegotiator, 'PLAIN');
   bool _authSent;
 
   final Logger _log;
@@ -50,9 +46,7 @@ class SaslPlainNegotiator extends Sasl2AuthenticationNegotiator {
   ) async {
     if (!_authSent) {
       final data = await getRawStep('');
-      attributes.sendNonza(
-        SaslPlainAuthNonza(data),
-      );
+      attributes.sendNonza(SaslPlainAuthNonza(data));
       _authSent = true;
       return const Result(NegotiatorState.ready);
     } else {
@@ -64,9 +58,7 @@ class SaslPlainNegotiator extends Sasl2AuthenticationNegotiator {
         // We assume it's a <failure/>
         final error = nonza.children.first.tag;
         await attributes.sendEvent(AuthenticationFailedEvent(error));
-        return Result(
-          SaslError.fromFailure(nonza),
-        );
+        return Result(SaslError.fromFailure(nonza));
       }
     }
   }
@@ -89,9 +81,7 @@ class SaslPlainNegotiator extends Sasl2AuthenticationNegotiator {
   Future<String> getRawStep(String input) async {
     final settings = attributes.getConnectionSettings();
     final prep = Saslprep.saslprep(settings.password);
-    return base64.encode(
-      utf8.encode('\u0000${settings.jid.local}\u0000$prep'),
-    );
+    return base64.encode(utf8.encode('\u0000${settings.jid.local}\u0000$prep'));
   }
 
   @override

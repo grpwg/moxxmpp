@@ -10,12 +10,7 @@ final scramSha1StreamFeatures = XMLNode(
     XMLNode.xmlns(
       tag: 'mechanisms',
       xmlns: saslXmlns,
-      children: [
-        XMLNode(
-          tag: 'mechanism',
-          text: 'SCRAM-SHA-1',
-        ),
-      ],
+      children: [XMLNode(tag: 'mechanism', text: 'SCRAM-SHA-1')],
     ),
   ],
 );
@@ -25,12 +20,7 @@ final scramSha256StreamFeatures = XMLNode(
     XMLNode.xmlns(
       tag: 'mechanisms',
       xmlns: saslXmlns,
-      children: [
-        XMLNode(
-          tag: 'mechanism',
-          text: 'SCRAM-SHA-256',
-        ),
-      ],
+      children: [XMLNode(tag: 'mechanism', text: 'SCRAM-SHA-256')],
     ),
   ],
 );
@@ -38,35 +28,36 @@ final scramSha256StreamFeatures = XMLNode(
 void main() {
   final fakeSocket = StubTCPSocket([]);
   test('Test SASL SCRAM-SHA-1', () async {
-    final negotiator = SaslScramNegotiator(
-      0,
-      'n=user,r=fyko+d2lbbFgONRv9qkxdawL',
-      'fyko+d2lbbFgONRv9qkxdawL',
-      ScramHashType.sha1,
-    )..register(
-        NegotiatorAttributes(
-          (XMLNode _, {String? redact}) {},
-          () => XmppConnection(
-            TestingReconnectionPolicy(),
-            AlwaysConnectedConnectivityManager(),
-            ClientToServerNegotiator(),
-            fakeSocket,
+    final negotiator =
+        SaslScramNegotiator(
+          0,
+          'n=user,r=fyko+d2lbbFgONRv9qkxdawL',
+          'fyko+d2lbbFgONRv9qkxdawL',
+          ScramHashType.sha1,
+        )..register(
+          NegotiatorAttributes(
+            (XMLNode _, {String? redact}) {},
+            () => XmppConnection(
+              TestingReconnectionPolicy(),
+              AlwaysConnectedConnectivityManager(),
+              ClientToServerNegotiator(),
+              fakeSocket,
+            ),
+            () => ConnectionSettings(
+              jid: JID.fromString('user@server'),
+              password: 'pencil',
+            ),
+            (_) async {},
+            getNegotiatorNullStub,
+            getManagerNullStub,
+            () => JID.fromString('user@server'),
+            () => fakeSocket,
+            () => false,
+            () {},
+            (_, {bool triggerEvent = true}) {},
+            (_) {},
           ),
-          () => ConnectionSettings(
-            jid: JID.fromString('user@server'),
-            password: 'pencil',
-          ),
-          (_) async {},
-          getNegotiatorNullStub,
-          getManagerNullStub,
-          () => JID.fromString('user@server'),
-          () => fakeSocket,
-          () => false,
-          () {},
-          (_, {bool triggerEvent = true}) {},
-          (_) {},
-        ),
-      );
+        );
 
     expect(
       HEX.encode(
@@ -139,35 +130,36 @@ void main() {
 
   test('Test SASL SCRAM-SHA-256', () async {
     String? lastMessage;
-    final negotiator = SaslScramNegotiator(
-      0,
-      'n=user,r=rOprNGfwEbeRWgbNEkqO',
-      'rOprNGfwEbeRWgbNEkqO',
-      ScramHashType.sha256,
-    )..register(
-        NegotiatorAttributes(
-          (XMLNode n, {String? redact}) => lastMessage = n.innerText(),
-          () => XmppConnection(
-            TestingReconnectionPolicy(),
-            AlwaysConnectedConnectivityManager(),
-            ClientToServerNegotiator(),
-            StubTCPSocket([]),
+    final negotiator =
+        SaslScramNegotiator(
+          0,
+          'n=user,r=rOprNGfwEbeRWgbNEkqO',
+          'rOprNGfwEbeRWgbNEkqO',
+          ScramHashType.sha256,
+        )..register(
+          NegotiatorAttributes(
+            (XMLNode n, {String? redact}) => lastMessage = n.innerText(),
+            () => XmppConnection(
+              TestingReconnectionPolicy(),
+              AlwaysConnectedConnectivityManager(),
+              ClientToServerNegotiator(),
+              StubTCPSocket([]),
+            ),
+            () => ConnectionSettings(
+              jid: JID.fromString('user@server'),
+              password: 'pencil',
+            ),
+            (_) async {},
+            getNegotiatorNullStub,
+            getManagerNullStub,
+            () => JID.fromString('user@server'),
+            () => fakeSocket,
+            () => false,
+            () {},
+            (_, {bool triggerEvent = true}) {},
+            (_) {},
           ),
-          () => ConnectionSettings(
-            jid: JID.fromString('user@server'),
-            password: 'pencil',
-          ),
-          (_) async {},
-          getNegotiatorNullStub,
-          getManagerNullStub,
-          () => JID.fromString('user@server'),
-          () => fakeSocket,
-          () => false,
-          () {},
-          (_, {bool triggerEvent = true}) {},
-          (_) {},
-        ),
-      );
+        );
 
     await negotiator.negotiate(scramSha256StreamFeatures);
     expect(
@@ -195,35 +187,36 @@ void main() {
   });
 
   test('Test a positive server signature check', () async {
-    final negotiator = SaslScramNegotiator(
-      0,
-      'n=user,r=fyko+d2lbbFgONRv9qkxdawL',
-      'fyko+d2lbbFgONRv9qkxdawL',
-      ScramHashType.sha1,
-    )..register(
-        NegotiatorAttributes(
-          (XMLNode _, {String? redact}) {},
-          () => XmppConnection(
-            TestingReconnectionPolicy(),
-            AlwaysConnectedConnectivityManager(),
-            ClientToServerNegotiator(),
-            StubTCPSocket([]),
+    final negotiator =
+        SaslScramNegotiator(
+          0,
+          'n=user,r=fyko+d2lbbFgONRv9qkxdawL',
+          'fyko+d2lbbFgONRv9qkxdawL',
+          ScramHashType.sha1,
+        )..register(
+          NegotiatorAttributes(
+            (XMLNode _, {String? redact}) {},
+            () => XmppConnection(
+              TestingReconnectionPolicy(),
+              AlwaysConnectedConnectivityManager(),
+              ClientToServerNegotiator(),
+              StubTCPSocket([]),
+            ),
+            () => ConnectionSettings(
+              jid: JID.fromString('user@server'),
+              password: 'pencil',
+            ),
+            (_) async {},
+            getNegotiatorNullStub,
+            getManagerNullStub,
+            () => JID.fromString('user@server'),
+            () => fakeSocket,
+            () => false,
+            () {},
+            (_, {bool triggerEvent = true}) {},
+            (_) {},
           ),
-          () => ConnectionSettings(
-            jid: JID.fromString('user@server'),
-            password: 'pencil',
-          ),
-          (_) async {},
-          getNegotiatorNullStub,
-          getManagerNullStub,
-          () => JID.fromString('user@server'),
-          () => fakeSocket,
-          () => false,
-          () {},
-          (_, {bool triggerEvent = true}) {},
-          (_) {},
-        ),
-      );
+        );
 
     await negotiator.negotiate(scramSha1StreamFeatures);
     await negotiator.negotiate(
@@ -241,35 +234,36 @@ void main() {
   });
 
   test('Test a negative server signature check', () async {
-    final negotiator = SaslScramNegotiator(
-      0,
-      'n=user,r=fyko+d2lbbFgONRv9qkxdawL',
-      'fyko+d2lbbFgONRv9qkxdawL',
-      ScramHashType.sha1,
-    )..register(
-        NegotiatorAttributes(
-          (XMLNode _, {String? redact}) {},
-          () => XmppConnection(
-            TestingReconnectionPolicy(),
-            AlwaysConnectedConnectivityManager(),
-            ClientToServerNegotiator(),
-            StubTCPSocket([]),
+    final negotiator =
+        SaslScramNegotiator(
+          0,
+          'n=user,r=fyko+d2lbbFgONRv9qkxdawL',
+          'fyko+d2lbbFgONRv9qkxdawL',
+          ScramHashType.sha1,
+        )..register(
+          NegotiatorAttributes(
+            (XMLNode _, {String? redact}) {},
+            () => XmppConnection(
+              TestingReconnectionPolicy(),
+              AlwaysConnectedConnectivityManager(),
+              ClientToServerNegotiator(),
+              StubTCPSocket([]),
+            ),
+            () => ConnectionSettings(
+              jid: JID.fromString('user@server'),
+              password: 'pencil',
+            ),
+            (_) async {},
+            getNegotiatorNullStub,
+            getManagerNullStub,
+            () => JID.fromString('user@server'),
+            () => fakeSocket,
+            () => false,
+            () {},
+            (_, {bool triggerEvent = true}) {},
+            (_) {},
           ),
-          () => ConnectionSettings(
-            jid: JID.fromString('user@server'),
-            password: 'pencil',
-          ),
-          (_) async {},
-          getNegotiatorNullStub,
-          getManagerNullStub,
-          () => JID.fromString('user@server'),
-          () => fakeSocket,
-          () => false,
-          () {},
-          (_, {bool triggerEvent = true}) {},
-          (_) {},
-        ),
-      );
+        );
 
     var result = await negotiator.negotiate(scramSha1StreamFeatures);
     expect(result.isType<NegotiatorState>(), true);
@@ -290,35 +284,36 @@ void main() {
   });
 
   test('Test a resetting the SCRAM negotiator', () async {
-    final negotiator = SaslScramNegotiator(
-      0,
-      'n=user,r=fyko+d2lbbFgONRv9qkxdawL',
-      'fyko+d2lbbFgONRv9qkxdawL',
-      ScramHashType.sha1,
-    )..register(
-        NegotiatorAttributes(
-          (XMLNode _, {String? redact}) {},
-          () => XmppConnection(
-            TestingReconnectionPolicy(),
-            AlwaysConnectedConnectivityManager(),
-            ClientToServerNegotiator(),
-            StubTCPSocket([]),
+    final negotiator =
+        SaslScramNegotiator(
+          0,
+          'n=user,r=fyko+d2lbbFgONRv9qkxdawL',
+          'fyko+d2lbbFgONRv9qkxdawL',
+          ScramHashType.sha1,
+        )..register(
+          NegotiatorAttributes(
+            (XMLNode _, {String? redact}) {},
+            () => XmppConnection(
+              TestingReconnectionPolicy(),
+              AlwaysConnectedConnectivityManager(),
+              ClientToServerNegotiator(),
+              StubTCPSocket([]),
+            ),
+            () => ConnectionSettings(
+              jid: JID.fromString('user@server'),
+              password: 'pencil',
+            ),
+            (_) async {},
+            getNegotiatorNullStub,
+            getManagerNullStub,
+            () => JID.fromString('user@server'),
+            () => fakeSocket,
+            () => false,
+            () {},
+            (_, {bool triggerEvent = true}) {},
+            (_) {},
           ),
-          () => ConnectionSettings(
-            jid: JID.fromString('user@server'),
-            password: 'pencil',
-          ),
-          (_) async {},
-          getNegotiatorNullStub,
-          getManagerNullStub,
-          () => JID.fromString('user@server'),
-          () => fakeSocket,
-          () => false,
-          () {},
-          (_, {bool triggerEvent = true}) {},
-          (_) {},
-        ),
-      );
+        );
 
     await negotiator.negotiate(scramSha1StreamFeatures);
     await negotiator.negotiate(

@@ -13,12 +13,8 @@ final stanza2 = Stanza.message(
 void main() {
   test('match all', () {
     final handler = StanzaHandler(
-      callback: (stanza, _) async => StanzaHandlerData(
-        true,
-        false,
-        stanza,
-        TypedMap(),
-      ),
+      callback: (stanza, _) async =>
+          StanzaHandlerData(true, false, stanza, TypedMap()),
     );
 
     expect(handler.matches(Stanza.iq(xmlns: stanzaXmlns)), true);
@@ -27,20 +23,14 @@ void main() {
     expect(handler.matches(stanza1), true);
     expect(handler.matches(stanza2), true);
     expect(
-      handler.matches(
-        XMLNode.xmlns(tag: 'active', xmlns: csiXmlns),
-      ),
+      handler.matches(XMLNode.xmlns(tag: 'active', xmlns: csiXmlns)),
       false,
     );
   });
   test('xmlns matching', () {
     final handler = StanzaHandler(
-      callback: (stanza, _) async => StanzaHandlerData(
-        true,
-        false,
-        stanza,
-        TypedMap(),
-      ),
+      callback: (stanza, _) async =>
+          StanzaHandlerData(true, false, stanza, TypedMap()),
       tagXmlns: 'owo',
     );
 
@@ -56,12 +46,7 @@ void main() {
     final handler = StanzaHandler(
       callback: (stanza, _) async {
         run = true;
-        return StanzaHandlerData(
-          true,
-          false,
-          stanza,
-          TypedMap(),
-        );
+        return StanzaHandlerData(true, false, stanza, TypedMap());
       },
       stanzaTag: 'iq',
     );
@@ -74,24 +59,15 @@ void main() {
 
     handler.callback(
       stanza2,
-      StanzaHandlerData(
-        false,
-        false,
-        stanza2,
-        TypedMap(),
-      ),
+      StanzaHandlerData(false, false, stanza2, TypedMap()),
     );
     expect(run, true);
   });
 
   test('tagName matching', () {
     final handler = StanzaHandler(
-      callback: (stanza, _) async => StanzaHandlerData(
-        true,
-        false,
-        stanza,
-        TypedMap(),
-      ),
+      callback: (stanza, _) async =>
+          StanzaHandlerData(true, false, stanza, TypedMap()),
       tagName: 'tag',
     );
 
@@ -104,12 +80,8 @@ void main() {
 
   test('combined matching', () {
     final handler = StanzaHandler(
-      callback: (stanza, _) async => StanzaHandlerData(
-        true,
-        false,
-        stanza,
-        TypedMap(),
-      ),
+      callback: (stanza, _) async =>
+          StanzaHandlerData(true, false, stanza, TypedMap()),
       tagName: 'tag',
       stanzaTag: 'iq',
       tagXmlns: 'owo',
@@ -124,12 +96,8 @@ void main() {
 
   test('Test matching stanzas with a different xmlns', () {
     final handler = StanzaHandler(
-      callback: (stanza, _) async => StanzaHandlerData(
-        true,
-        false,
-        stanza,
-        TypedMap(),
-      ),
+      callback: (stanza, _) async =>
+          StanzaHandlerData(true, false, stanza, TypedMap()),
       xmlns: componentAcceptXmlns,
     );
 
@@ -144,31 +112,19 @@ void main() {
   test('sorting', () {
     final handlerList = [
       StanzaHandler(
-        callback: (stanza, _) async => StanzaHandlerData(
-          true,
-          false,
-          stanza,
-          TypedMap(),
-        ),
+        callback: (stanza, _) async =>
+            StanzaHandlerData(true, false, stanza, TypedMap()),
         tagName: '1',
         priority: 100,
       ),
       StanzaHandler(
-        callback: (stanza, _) async => StanzaHandlerData(
-          true,
-          false,
-          stanza,
-          TypedMap(),
-        ),
+        callback: (stanza, _) async =>
+            StanzaHandlerData(true, false, stanza, TypedMap()),
         tagName: '2',
       ),
       StanzaHandler(
-        callback: (stanza, _) async => StanzaHandlerData(
-          true,
-          false,
-          stanza,
-          TypedMap(),
-        ),
+        callback: (stanza, _) async =>
+            StanzaHandlerData(true, false, stanza, TypedMap()),
         tagName: '3',
         priority: 50,
       ),

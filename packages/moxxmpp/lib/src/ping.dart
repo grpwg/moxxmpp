@@ -48,10 +48,7 @@ class PingManager extends XmppManagerBase {
     await _timerLock.synchronized(() {
       logger.finest('Scheduling new timer? ${_pingTimer != null}');
 
-      _pingTimer ??= Timer.periodic(
-        _pingDuration,
-        _sendPing,
-      );
+      _pingTimer ??= Timer.periodic(_pingDuration, _sendPing);
     });
   }
 
@@ -68,7 +65,7 @@ class PingManager extends XmppManagerBase {
     final stream = attrs.getManagerById(smManager) as StreamManagementManager?;
     if (stream != null) {
       if (stream
-          .isStreamManagementEnabled() /*&& stream.getUnackedStanzaCount() > 0*/) {
+          .isStreamManagementEnabled() /*&& stream.getUnackedStanzaCount() > 0*/ ) {
         logger.finest('Sending an ack ping as Stream Management is enabled');
         stream.sendAckRequestPing();
       } else if (attrs.getSocket().whitespacePingAllowed()) {

@@ -57,9 +57,7 @@ class DiscoInfo {
         );
       } else if (element.tag == 'x' &&
           element.attributes['xmlns'] == dataFormsXmlns) {
-        extendedInfo.add(
-          parseDataForm(element),
-        );
+        extendedInfo.add(parseDataForm(element));
       }
     }
 
@@ -83,19 +81,12 @@ class DiscoInfo {
       tag: 'query',
       xmlns: discoInfoXmlns,
       attributes: node != null
-          ? <String, String>{
-              'node': node!,
-            }
+          ? <String, String>{'node': node!}
           : <String, String>{},
       children: [
         ...identities.map((identity) => identity.toXMLNode()),
         ...features.map(
-          (feature) => XMLNode(
-            tag: 'feature',
-            attributes: {
-              'var': feature,
-            },
-          ),
+          (feature) => XMLNode(tag: 'feature', attributes: {'var': feature}),
         ),
         if (extendedInfo.isNotEmpty) ...extendedInfo.map((ei) => ei.toXml()),
       ],
@@ -111,9 +102,7 @@ class DiscoItem {
   final String? name;
 
   XMLNode toXml() {
-    final attributes = {
-      'jid': jid.toString(),
-    };
+    final attributes = {'jid': jid.toString()};
     if (node != null) {
       attributes['node'] = node!;
     }
@@ -121,9 +110,6 @@ class DiscoItem {
       attributes['name'] = name!;
     }
 
-    return XMLNode(
-      tag: 'node',
-      attributes: attributes,
-    );
+    return XMLNode(tag: 'node', attributes: attributes);
   }
 }

@@ -10,15 +10,8 @@ class DataFormOption {
   XMLNode toXml() {
     return XMLNode(
       tag: 'option',
-      attributes: {
-        if (label != null) 'label': label,
-      },
-      children: [
-        XMLNode(
-          tag: 'value',
-          text: value,
-        ),
-      ],
+      attributes: {if (label != null) 'label': label},
+      children: [XMLNode(tag: 'value', text: value)],
     );
   }
 }
@@ -50,15 +43,8 @@ class DataFormField {
         if (label != null) 'label': label,
       },
       children: [
-        if (description != null)
-          XMLNode(
-            tag: 'desc',
-            text: description,
-          ),
-        if (isRequired)
-          XMLNode(
-            tag: 'required',
-          ),
+        if (description != null) XMLNode(tag: 'desc', text: description),
+        if (isRequired) XMLNode(tag: 'required'),
         ...values.map((value) => XMLNode(tag: 'value', text: value)),
         ...options.map((option) => option.toXml()),
       ],
@@ -92,7 +78,7 @@ class DataForm {
       xmlns: dataFormsXmlns,
       attributes: {'type': type},
       children: [
-        ...instructions.map((i) => XMLNode(tag: 'instruction', text: i)),
+        ...instructions.map((i) => XMLNode(tag: 'instructions', text: i)),
         ...title != null ? [XMLNode(tag: 'title', text: title)] : [],
         ...fields.map((field) => field.toXml()),
         ...reported.map((report) => report.toXml()),
@@ -102,6 +88,30 @@ class DataForm {
             children: item.map((i) => i.toXml()).toList(),
           ),
         ),
+      ],
+    );
+  }
+
+  /// XEP-0004 submit payload (Conversations `Data.submit`): `type=submit` and
+  /// field var/value only — no instructions, options, or labels.
+  XMLNode toSubmitXml() {
+    return XMLNode.xmlns(
+      tag: 'x',
+      xmlns: dataFormsXmlns,
+      attributes: {'type': 'submit'},
+      children: [
+        for (final field in fields)
+          XMLNode(
+            tag: 'field',
+            attributes: <String, dynamic>{
+              if (field.varAttr != null) 'var': field.varAttr,
+              if (field.type == 'hidden') 'type': 'hidden',
+            },
+            children: [
+              for (final value in field.values)
+                XMLNode(tag: 'value', text: value),
+            ],
+          ),
       ],
     );
   }
@@ -123,6 +133,7 @@ DataFormField _parseDataFormField(XMLNode field) {
   return DataFormField(
     varAttr: field.attributes['var'] as String?,
     type: field.attributes['type'] as String?,
+    label: field.attributes['label'] as String?,
     options: options,
     values: values,
     isRequired: isRequired,
@@ -137,10 +148,13 @@ DataForm parseDataForm(XMLNode x) {
 
   final type = x.attributes['type']! as String;
   final title = x.firstTag('title')?.innerText();
-  final instructions =
-      x.findTags('instructions').map((i) => i.innerText()).toList();
+  final instructions = x
+      .findTags('instructions')
+      .map((i) => i.innerText())
+      .toList();
   final fields = x.findTags('field').map(_parseDataFormField).toList();
-  final reported = x
+  final reported =
+      x
           .firstTag('reported')
           ?.findTags('field')
           .map((i) => _parseDataFormField(i.firstTag('field')!))

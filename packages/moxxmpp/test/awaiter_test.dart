@@ -34,9 +34,7 @@ void main() {
     final stanza = XMLNode.fromString(
       '<iq from="user1@server.example" id="abc123" type="result" />',
     );
-    final result3 = await awaiter.onData(
-      stanza,
-    );
+    final result3 = await awaiter.onData(stanza);
     expect(result3, true);
     expect(await future, stanza);
   });
@@ -55,9 +53,7 @@ void main() {
 
     // Receive the correct answer
     final stanza = XMLNode.fromString('<iq id="abc123" type="result" />');
-    final result2 = await awaiter.onData(
-      stanza,
-    );
+    final result2 = await awaiter.onData(stanza);
     expect(result2, true);
     expect(await future, stanza);
   });
@@ -70,16 +66,12 @@ void main() {
 
     // Receive the correct answer
     final stanza = XMLNode.fromString('<iq id="abc123" type="result" />');
-    final result1 = await awaiter.onData(
-      stanza,
-    );
+    final result1 = await awaiter.onData(stanza);
     expect(result1, true);
     expect(await future, stanza);
 
     // Receive it again
-    final result2 = await awaiter.onData(
-      stanza,
-    );
+    final result2 = await awaiter.onData(stanza);
     expect(result2, false);
   });
 
@@ -97,9 +89,7 @@ void main() {
     expect(result1, false);
 
     // Receive the correct answer
-    final result2 = await awaiter.onData(
-      stanza,
-    );
+    final result2 = await awaiter.onData(stanza);
     expect(result2, true);
     expect(await future, stanza);
   });
@@ -117,17 +107,31 @@ void main() {
   });
 
   test(
-      'Sending a stanza to our bare JID and receiving stanza with a from attribute',
-      () async {
+    'Sending a stanza to our bare JID and receiving stanza with a from attribute',
+    () async {
+      final awaiter = StanzaAwaiter(getBareJidCallback);
+
+      // "Send" a stanza
+      final future = await awaiter.addPending(bareJid, 'abc123', 'iq');
+
+      // Receive the response.
+      final stanza = XMLNode.fromString(
+        '<iq from="$bareJid" id="abc123" type="result" />',
+      );
+      await awaiter.onData(stanza);
+      expect(await future, stanza);
+    },
+  );
+
+  test('MUC IQ: pending bare JID matches full-JID response', () async {
     final awaiter = StanzaAwaiter(getBareJidCallback);
+    const room = 'room@muc.example';
+    final future = await awaiter.addPending(room, 'cfg1', 'iq');
 
-    // "Send" a stanza
-    final future = await awaiter.addPending(bareJid, 'abc123', 'iq');
-
-    // Receive the response.
-    final stanza =
-        XMLNode.fromString('<iq from="$bareJid" id="abc123" type="result" />');
-    await awaiter.onData(stanza);
+    final stanza = XMLNode.fromString(
+      '<iq from="$room/owner-nick" id="cfg1" type="result" />',
+    );
+    expect(await awaiter.onData(stanza), true);
     expect(await future, stanza);
   });
 }

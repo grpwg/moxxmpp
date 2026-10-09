@@ -9,18 +9,12 @@ import 'package:moxxmpp/src/xeps/xep_0386.dart';
 
 class CSIActiveNonza extends XMLNode {
   CSIActiveNonza()
-      : super(
-          tag: 'active',
-          attributes: <String, String>{'xmlns': csiXmlns},
-        );
+    : super(tag: 'active', attributes: <String, String>{'xmlns': csiXmlns});
 }
 
 class CSIInactiveNonza extends XMLNode {
   CSIInactiveNonza()
-      : super(
-          tag: 'inactive',
-          attributes: <String, String>{'xmlns': csiXmlns},
-        );
+    : super(tag: 'inactive', attributes: <String, String>{'xmlns': csiXmlns});
 }
 
 /// A Stub negotiator that is just for "intercepting" the stream feature.
@@ -52,9 +46,7 @@ class CSINegotiator extends XmppFeatureNegotiatorBase
 
     _supported = true;
     final active = attributes.getManagerById<CSIManager>(csiManager)!.isActive;
-    return [
-      if (active) CSIActiveNonza() else CSIInactiveNonza(),
-    ];
+    return [if (active) CSIActiveNonza() else CSIInactiveNonza()];
   }
 
   @override

@@ -38,15 +38,15 @@ class OOBManager extends XmppManagerBase {
 
   @override
   List<StanzaHandler> getIncomingStanzaHandlers() => [
-        StanzaHandler(
-          stanzaTag: 'message',
-          tagName: 'x',
-          tagXmlns: oobDataXmlns,
-          callback: _onMessage,
-          // Before the message manager
-          priority: -99,
-        ),
-      ];
+    StanzaHandler(
+      stanzaTag: 'message',
+      tagName: 'x',
+      tagXmlns: oobDataXmlns,
+      callback: _onMessage,
+      // Before the message manager
+      priority: -99,
+    ),
+  ];
 
   @override
   Future<bool> isSupported() async => true;
@@ -59,24 +59,14 @@ class OOBManager extends XmppManagerBase {
     final url = x.firstTag('url');
     final desc = x.firstTag('desc');
 
-    return state
-      ..extensions.set(
-        OOBData(
-          url?.innerText(),
-          desc?.innerText(),
-        ),
-      );
+    return state..extensions.set(OOBData(url?.innerText(), desc?.innerText()));
   }
 
   List<XMLNode> _messageSendingCallback(
     TypedMap<StanzaHandlerExtension> extensions,
   ) {
     final data = extensions.get<OOBData>();
-    return data != null
-        ? [
-            data.toXML(),
-          ]
-        : [];
+    return data != null ? [data.toXML()] : [];
   }
 
   @override
