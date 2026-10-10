@@ -6,6 +6,7 @@ class ConnectionSettings {
     required this.password,
     this.host,
     this.port,
+    this.register = false,
   });
 
   /// The JID to authenticate as.
@@ -19,6 +20,10 @@ class ConnectionSettings {
 
   /// The port to connect to. Skips DNS resolution if specified.
   final int? port;
+
+  /// When true, negotiate XEP-0077 in-band registration after TLS instead of
+  /// SASL (Conversations `Account.OPTION_REGISTER`).
+  final bool register;
 
   /// The JID of the server we're connected to.
   JID get serverJid => JID('', jid.domain, '');

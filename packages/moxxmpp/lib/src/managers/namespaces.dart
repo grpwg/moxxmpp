@@ -35,3 +35,4 @@ const messageProcessingHintManager = 'org.moxxmpp.messageprocessinghint';
 const occupantIdManager = 'org.moxxmpp.occupantidmanager';
 const mucManager = 'org.moxxmpp.mucmanager';
 const mamManager = 'org.moxxmpp.mammanager';
+const inBandRegistrationManager = 'org.moxxmpp.inbandregistrationmanager';

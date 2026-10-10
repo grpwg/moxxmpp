@@ -12,20 +12,18 @@ import 'package:moxxmpp_socket_tcp/src/rfc_2782.dart';
 ///
 /// Injected by apps that need SOCKS5 / Tor (Conversations-style unified
 /// network path) so every XMPP hop goes through the same connector.
-typedef TcpSocketConnect = Future<Socket> Function(
-  String host,
-  int port, {
-  Duration? timeout,
-});
+typedef TcpSocketConnect =
+    Future<Socket> Function(String host, int port, {Duration? timeout});
 
 /// Upgrades a plain [Socket] to TLS (inject when [connectSocket] returns a
 /// wrapper that [SecureSocket.secure] cannot unwrap).
-typedef TcpSocketSecure = Future<SecureSocket> Function(
-  Socket socket, {
-  dynamic host,
-  List<String>? supportedProtocols,
-  bool Function(X509Certificate certificate)? onBadCertificate,
-});
+typedef TcpSocketSecure =
+    Future<SecureSocket> Function(
+      Socket socket, {
+      dynamic host,
+      List<String>? supportedProtocols,
+      bool Function(X509Certificate certificate)? onBadCertificate,
+    });
 
 /// TCP socket implementation for XmppConnection
 class TCPSocketWrapper extends BaseSocketWrapper {
@@ -33,16 +31,15 @@ class TCPSocketWrapper extends BaseSocketWrapper {
     this._logIncomingOutgoing, {
     TcpSocketConnect? connectSocket,
     TcpSocketSecure? secureSocket,
-  })  : _connectSocket = connectSocket ?? defaultTcpConnect,
-        _secureSocket = secureSocket ?? defaultTcpSecure;
+  }) : _connectSocket = connectSocket ?? defaultTcpConnect,
+       _secureSocket = secureSocket ?? defaultTcpSecure;
 
   /// Default direct connect (no proxy).
   static Future<Socket> defaultTcpConnect(
     String host,
     int port, {
     Duration? timeout,
-  }) =>
-      Socket.connect(host, port, timeout: timeout);
+  }) => Socket.connect(host, port, timeout: timeout);
 
   /// Default TLS upgrade for a real `dart:io` [Socket].
   static Future<SecureSocket> defaultTcpSecure(
@@ -50,13 +47,12 @@ class TCPSocketWrapper extends BaseSocketWrapper {
     dynamic host,
     List<String>? supportedProtocols,
     bool Function(X509Certificate certificate)? onBadCertificate,
-  }) =>
-      SecureSocket.secure(
-        socket,
-        host: host,
-        supportedProtocols: supportedProtocols,
-        onBadCertificate: onBadCertificate,
-      );
+  }) => SecureSocket.secure(
+    socket,
+    host: host,
+    supportedProtocols: supportedProtocols,
+    onBadCertificate: onBadCertificate,
+  );
 
   /// Flag controlling whether incoming/outgoing data is logged or not.
   final bool _logIncomingOutgoing;

@@ -15,18 +15,18 @@ void main() {
     'Failing an awaited connection with TestingSleepReconnectionPolicy',
     () async {
       var errors = 0;
-      final connection = XmppConnection(
-        TestingSleepReconnectionPolicy(10),
-        AlwaysConnectedConnectivityManager(),
-        ClientToServerNegotiator(),
-        TCPSocketWrapper(true),
-      )..connectionSettings = ConnectionSettings(
-          jid: JID.fromString('testuser@no-sasl.badxmpp.eu'),
-          password: 'abc123',
-        );
-      await connection.registerFeatureNegotiators([
-        StartTlsNegotiator(),
-      ]);
+      final connection =
+          XmppConnection(
+              TestingSleepReconnectionPolicy(10),
+              AlwaysConnectedConnectivityManager(),
+              ClientToServerNegotiator(),
+              TCPSocketWrapper(true),
+            )
+            ..connectionSettings = ConnectionSettings(
+              jid: JID.fromString('testuser@no-sasl.badxmpp.eu'),
+              password: 'abc123',
+            );
+      await connection.registerFeatureNegotiators([StartTlsNegotiator()]);
       connection.asBroadcastStream().listen((event) {
         if (event is ConnectionStateChangedEvent) {
           if (event.state == XmppConnectionState.error) {
@@ -55,18 +55,18 @@ void main() {
     'Failing an awaited connection with ExponentialBackoffReconnectionPolicy',
     () async {
       var errors = 0;
-      final connection = XmppConnection(
-        TestingReconnectionPolicy(),
-        AlwaysConnectedConnectivityManager(),
-        ClientToServerNegotiator(),
-        TCPSocketWrapper(true),
-      )..connectionSettings = ConnectionSettings(
-          jid: JID.fromString('testuser@no-sasl.badxmpp.eu'),
-          password: 'abc123',
-        );
-      await connection.registerFeatureNegotiators([
-        StartTlsNegotiator(),
-      ]);
+      final connection =
+          XmppConnection(
+              TestingReconnectionPolicy(),
+              AlwaysConnectedConnectivityManager(),
+              ClientToServerNegotiator(),
+              TCPSocketWrapper(true),
+            )
+            ..connectionSettings = ConnectionSettings(
+              jid: JID.fromString('testuser@no-sasl.badxmpp.eu'),
+              password: 'abc123',
+            );
+      await connection.registerFeatureNegotiators([StartTlsNegotiator()]);
       connection.asBroadcastStream().listen((event) {
         if (event is ConnectionStateChangedEvent) {
           if (event.state == XmppConnectionState.error) {

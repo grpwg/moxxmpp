@@ -112,7 +112,7 @@ class EmeManager extends XmppManagerBase {
     final encryption = message.firstTag('encryption', xmlns: emeXmlns);
     if (encryption == null) return state;
 
-    final namespace = encryption.attributes['namespace'];
+    final namespace = encryption.attributes['namespace'] as String?;
     if (namespace == null || namespace.isEmpty) return state;
 
     return state

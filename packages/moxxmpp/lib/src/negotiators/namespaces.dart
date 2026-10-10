@@ -7,6 +7,7 @@ const rosterNegotiator = 'im.moxxmpp.core.roster';
 const resourceBindingNegotiator = 'im.moxxmpp.core.resource';
 const streamManagementNegotiator = 'im.moxxmpp.xeps.sm';
 const startTlsNegotiator = 'im.moxxmpp.core.starttls';
+const inBandRegistrationNegotiator = 'im.moxxmpp.xeps.ibr';
 const sasl2Negotiator = 'org.moxxmpp.sasl.sasl2';
 const bind2Negotiator = 'org.moxxmpp.bind2';
 const saslFASTNegotiator = 'org.moxxmpp.sasl.fast';

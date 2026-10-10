@@ -58,6 +58,19 @@ const pubsubNodeConfigMultiItems =
 // XEP-0066
 const oobDataXmlns = 'jabber:x:oob';
 
+// XEP-0077 (In-Band Registration)
+const registerXmlns = 'jabber:iq:register';
+const registerStreamFeatureXmlns = 'http://jabber.org/features/iq-register';
+
+// XEP-0158 (CAPTCHA Forms) — used with IBR
+const captchaXmlns = 'urn:xmpp:captcha';
+
+// XEP-0231 (Bits of Binary) — captcha image payloads
+const bobXmlns = 'urn:xmpp:bob';
+
+// XEP-0221 (Data Forms Media Element)
+const mediaElementXmlns = 'urn:xmpp:media-element';
+
 // XEP-0084
 const userAvatarDataXmlns = 'urn:xmpp:avatar:data';
 const userAvatarMetadataXmlns = 'urn:xmpp:avatar:metadata';

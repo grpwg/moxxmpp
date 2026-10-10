@@ -14,18 +14,18 @@ Future<void> _runTest(String domain) async {
     }
   });
 
-  final connection = XmppConnection(
-    TestingReconnectionPolicy(),
-    AlwaysConnectedConnectivityManager(),
-    ClientToServerNegotiator(),
-    socket,
-  )..connectionSettings = ConnectionSettings(
-      jid: JID.fromString('testuser@$domain'),
-      password: 'abc123',
-    );
-  await connection.registerFeatureNegotiators([
-    StartTlsNegotiator(),
-  ]);
+  final connection =
+      XmppConnection(
+          TestingReconnectionPolicy(),
+          AlwaysConnectedConnectivityManager(),
+          ClientToServerNegotiator(),
+          socket,
+        )
+        ..connectionSettings = ConnectionSettings(
+          jid: JID.fromString('testuser@$domain'),
+          password: 'abc123',
+        );
+  await connection.registerFeatureNegotiators([StartTlsNegotiator()]);
 
   final result = await connection.connect(
     shouldReconnect: false,
