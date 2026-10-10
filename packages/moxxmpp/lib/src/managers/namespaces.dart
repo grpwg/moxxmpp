@@ -8,6 +8,7 @@ const carbonsManager = 'org.moxxmpp.carbonsmanager';
 const vcardManager = 'org.moxxmpp.vcardmanager';
 const pubsubManager = 'org.moxxmpp.pubsubmanager';
 const userAvatarManager = 'org.moxxmpp.useravatarmanager';
+const nickManager = 'org.moxxmpp.nickmanager';
 const stableIdManager = 'org.moxxmpp.stableidmanager';
 const simsManager = 'org.moxxmpp.simsmanager';
 const messageDeliveryReceiptManager =

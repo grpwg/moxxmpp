@@ -75,6 +75,9 @@ const mediaElementXmlns = 'urn:xmpp:media-element';
 const userAvatarDataXmlns = 'urn:xmpp:avatar:data';
 const userAvatarMetadataXmlns = 'urn:xmpp:avatar:metadata';
 
+// XEP-0172 User Nickname
+const nickXmlns = 'http://jabber.org/protocol/nick';
+
 // XEP-0085
 const chatStateXmlns = 'http://jabber.org/protocol/chatstates';
 

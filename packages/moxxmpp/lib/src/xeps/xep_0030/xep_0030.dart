@@ -43,6 +43,10 @@ class DiscoManager extends XmppManagerBase {
   /// Map full JID to Disco Info
   final Map<DiscoCacheKey, DiscoInfo> _discoInfoCache = {};
 
+  /// Server + component disco#info from the last [performDiscoSweep]
+  /// (Conversations `DiscoManager.getServerItems`).
+  final Map<JID, DiscoInfo> _serverItems = {};
+
   /// The tracker for tracking disco#info queries that are in flight.
   final WaitForTracker<DiscoCacheKey, Result<StanzaError, DiscoInfo>>
   _discoInfoTracker = WaitForTracker();
@@ -65,6 +69,33 @@ class DiscoManager extends XmppManagerBase {
 
   /// The list of disco features that are registered.
   List<String> get features => _features;
+
+  /// Disco#info for the user server and each disco#items child from the last
+  /// sweep. Empty until [performDiscoSweep] succeeds.
+  Map<JID, DiscoInfo> get serverItems => Map.unmodifiable(_serverItems);
+
+  /// MUC hosts suitable for public room listing (Conversations
+  /// `MultiUserChatManager.getServices`): `conference/text` + MUC, not IRC
+  /// gateways.
+  List<JID> get mucServices {
+    final out = <JID>[];
+    for (final entry in _serverItems.entries) {
+      final info = entry.value;
+      final jid = info.jid ?? entry.key;
+      final hasMuc = info.features.contains(mucXmlns);
+      final isText = info.identities.any(
+        (i) => i.category == 'conference' && i.type == 'text',
+      );
+      final isIrc = info.identities.any(
+        (i) => i.category == 'conference' && i.type == 'irc',
+      );
+      final isGateway = info.features.contains('jabber:iq:gateway');
+      if (hasMuc && isText && !isIrc && !isGateway) {
+        out.add(jid);
+      }
+    }
+    return out;
+  }
 
   @visibleForTesting
   WaitForTracker<DiscoCacheKey, Result<StanzaError, DiscoInfo>>
@@ -108,6 +139,7 @@ class DiscoManager extends XmppManagerBase {
       await _cacheLock.synchronized(() async {
         // Clear the cache
         _discoInfoCache.clear();
+        _serverItems.clear();
       });
     }
   }
@@ -356,11 +388,16 @@ class DiscoManager extends XmppManagerBase {
     final attrs = getAttributes();
     final serverJid = attrs.getConnectionSettings().jid.toDomain();
     final infoResults = List<DiscoInfo>.empty(growable: true);
+    await _cacheLock.synchronized(_serverItems.clear);
     final result = await discoInfoQuery(serverJid);
     if (result.isType<DiscoInfo>()) {
       final info = result.get<DiscoInfo>();
       logger.finest('Discovered supported server features: ${info.features}');
       infoResults.add(info);
+      final key = info.jid ?? serverJid;
+      await _cacheLock.synchronized(() {
+        _serverItems[key] = info;
+      });
 
       attrs.sendEvent(ServerItemDiscoEvent(info));
       attrs.sendEvent(ServerDiscoDoneEvent());
@@ -382,6 +419,10 @@ class DiscoManager extends XmppManagerBase {
           final itemInfo = itemInfoResult.get<DiscoInfo>();
           logger.finest('Received info for ${item.jid}');
           infoResults.add(itemInfo);
+          final key = itemInfo.jid ?? item.jid;
+          await _cacheLock.synchronized(() {
+            _serverItems[key] = itemInfo;
+          });
           attrs.sendEvent(ServerItemDiscoEvent(itemInfo));
         } else {
           logger.warning('Failed to discover info for ${item.jid}');
